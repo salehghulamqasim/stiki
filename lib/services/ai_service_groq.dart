@@ -3,6 +3,7 @@
 
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
 class AiService {
@@ -24,7 +25,7 @@ User request: $userRequest
 """;
 
     try {
-      print('🔄 Making API request...');
+      debugPrint('🔄 Making API request...');
 
       final response = await http.post(
         Uri.parse(_baseUrl),

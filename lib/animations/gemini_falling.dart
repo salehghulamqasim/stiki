@@ -256,7 +256,9 @@ class EnhancedStarPainter extends CustomPainter {
         center,
         radius,
         Paint()
-          ..color = primaryColor.withValues(alpha: 0.5 * (1 - explosionProgress))
+          ..color = primaryColor.withValues(
+            alpha: 0.5 * (1 - explosionProgress),
+          )
           ..maskFilter = MaskFilter.blur(BlurStyle.normal, blur * 3),
       );
 
@@ -273,7 +275,9 @@ class EnhancedStarPainter extends CustomPainter {
         canvas.drawPath(
           path,
           Paint()
-            ..color = primaryColor.withValues(alpha: 0.9 * (1 - explosionProgress))
+            ..color = primaryColor.withValues(
+              alpha: 0.9 * (1 - explosionProgress),
+            )
             ..style = PaintingStyle.stroke
             ..strokeWidth =
                 3 // Increased width
@@ -286,7 +290,9 @@ class EnhancedStarPainter extends CustomPainter {
         center,
         radius * 0.4, // Increased center glow size
         glowPaint
-          ..color = primaryColor.withValues(alpha: 1.0 * (1 - explosionProgress)),
+          ..color = primaryColor.withValues(
+            alpha: 1.0 * (1 - explosionProgress),
+          ),
       );
     } else {
       // Enhanced star glow
@@ -350,6 +356,7 @@ class EnhancedStarPainter extends CustomPainter {
 
 // Usage
 class MyScreen extends StatelessWidget {
+  const MyScreen({super.key});
   @override
   Widget build(BuildContext context) {
     return Scaffold(

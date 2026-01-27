@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:stiki/animations/stiki_animations.dart';
 import 'package:stiki/theme/app_colors.dart';
 
@@ -26,9 +27,9 @@ class WidgetOptionCard2 extends StatelessWidget {
     return CozyTapScale(
       onTap: onTap,
       child: Container(
-        width: 165, // Absolute width for stability
-        height: 150,
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        width: 165.w, // Absolute width for stability
+        height: 150.h,
+        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
         decoration: BoxDecoration(
           color: backgroundColor,
           borderRadius: BorderRadius.circular(32),
@@ -47,13 +48,13 @@ class WidgetOptionCard2 extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 Container(
-                  width: 36,
-                  height: 36,
+                  width: 36.w,
+                  height: 36.h,
                   decoration: BoxDecoration(
                     color: circleColor,
                     shape: BoxShape.circle,
                   ),
-                  child: Icon(Icons.add, color: iconColor, size: 20),
+                  child: Icon(Icons.add, color: iconColor, size: 20.sp),
                 ),
               ],
             ),
@@ -67,14 +68,14 @@ class WidgetOptionCard2 extends StatelessWidget {
               child: Text(
                 title,
                 style: GoogleFonts.outfit(
-                  fontSize: 22,
+                  fontSize: 22.sp,
                   fontWeight: FontWeight.bold,
                   color: textColor,
                   height: 1.2,
                 ),
               ),
             ),
-            const SizedBox(height: 4),
+            SizedBox(height: 4.h),
           ],
         ),
       ),

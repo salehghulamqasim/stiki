@@ -1,7 +1,8 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+
 import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:home_widget/home_widget.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:stiki/animations/stiki_animations.dart';
@@ -113,7 +114,7 @@ class _WidgetScreenState extends State<WidgetScreen> {
           SafeArea(
             child: SingleChildScrollView(
               child: Padding(
-                padding: const EdgeInsets.all(24),
+                padding: EdgeInsets.all(16.r),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -124,33 +125,33 @@ class _WidgetScreenState extends State<WidgetScreen> {
                           Navigator.pop(context);
                         },
                         child: Container(
-                          padding: const EdgeInsets.all(12),
+                          padding: EdgeInsets.all(12.r),
                           decoration: BoxDecoration(
                             color: AppColors.darkBackground,
                             borderRadius: BorderRadius.circular(12),
                           ),
-                          child: const Icon(
+                          child: Icon(
                             Icons.arrow_back,
                             color: Colors.white,
-                            size: 20,
+                            size: 20.sp,
                           ),
                         ),
                       ),
                     ),
 
-                    const SizedBox(height: 32),
+                    SizedBox(height: 32.h),
                     PremiumEntrance(
                       index: 1,
                       child: Text(
                         "Ai Quote Generator",
                         style: GoogleFonts.poppins(
                           color: Colors.black,
-                          fontSize: 32,
+                          fontSize: 32.sp,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                     ),
-                    const SizedBox(height: 24),
+                    SizedBox(height: 24.h),
                     PremiumEntrance(
                       index: 2,
                       child: GeneratorWidget(
@@ -213,14 +214,14 @@ class _WidgetScreenState extends State<WidgetScreen> {
                       ),
                     ),
 
-                    const SizedBox(height: 20),
+                    SizedBox(height: 20.h),
 
                     // Helper Guide - Simplified
                     if (!loadingQuotes && generatedQuotes.isEmpty)
                       PremiumEntrance(
                         index: 3,
                         child: Container(
-                          padding: const EdgeInsets.all(16),
+                          padding: EdgeInsets.all(16.r),
                           decoration: BoxDecoration(
                             color: Colors.black.withValues(alpha: 0.02),
                             borderRadius: BorderRadius.circular(16),
@@ -236,7 +237,7 @@ class _WidgetScreenState extends State<WidgetScreen> {
                                 children: [
                                   Icon(
                                     Icons.lightbulb_outline,
-                                    size: 14,
+                                    size: 14.sp,
                                     color: AppColors.textSecondary.withValues(
                                       alpha: 0.5,
                                     ),
@@ -248,7 +249,7 @@ class _WidgetScreenState extends State<WidgetScreen> {
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
                                       style: GoogleFonts.poppins(
-                                        fontSize: 13,
+                                        fontSize: 13.sp,
                                         color: AppColors.textSecondary
                                             .withValues(alpha: 0.65),
                                       ),
@@ -264,7 +265,7 @@ class _WidgetScreenState extends State<WidgetScreen> {
                                 children: [
                                   Icon(
                                     Icons.psychology_outlined,
-                                    size: 14,
+                                    size: 14.sp,
                                     color: AppColors.textSecondary.withValues(
                                       alpha: 0.5,
                                     ),
@@ -276,7 +277,7 @@ class _WidgetScreenState extends State<WidgetScreen> {
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
                                       style: GoogleFonts.poppins(
-                                        fontSize: 13,
+                                        fontSize: 13.sp,
                                         color: AppColors.textSecondary
                                             .withValues(alpha: 0.65),
                                       ),
@@ -292,7 +293,7 @@ class _WidgetScreenState extends State<WidgetScreen> {
                                 children: [
                                   Icon(
                                     Icons.schedule_outlined,
-                                    size: 14,
+                                    size: 14.sp,
                                     color: AppColors.textSecondary.withValues(
                                       alpha: 0.5,
                                     ),
@@ -304,7 +305,7 @@ class _WidgetScreenState extends State<WidgetScreen> {
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
                                       style: GoogleFonts.poppins(
-                                        fontSize: 13,
+                                        fontSize: 13.sp,
                                         color: AppColors.textSecondary
                                             .withValues(alpha: 0.65),
                                       ),
@@ -317,7 +318,7 @@ class _WidgetScreenState extends State<WidgetScreen> {
 
                               // Disclaimer
                               Container(
-                                padding: const EdgeInsets.all(10),
+                                padding: EdgeInsets.all(10.r),
                                 decoration: BoxDecoration(
                                   color: Colors.black.withValues(alpha: 0.02),
                                   borderRadius: BorderRadius.circular(8),
@@ -326,7 +327,7 @@ class _WidgetScreenState extends State<WidgetScreen> {
                                   children: [
                                     Icon(
                                       Icons.info_outline,
-                                      size: 13,
+                                      size: 13.sp,
                                       color: AppColors.textSecondary.withValues(
                                         alpha: 0.45,
                                       ),
@@ -338,7 +339,7 @@ class _WidgetScreenState extends State<WidgetScreen> {
                                         maxLines: 1,
                                         overflow: TextOverflow.ellipsis,
                                         style: GoogleFonts.poppins(
-                                          fontSize: 13,
+                                          fontSize: 13.sp,
                                           color: AppColors.textSecondary
                                               .withValues(alpha: 0.55),
                                         ),
@@ -352,7 +353,7 @@ class _WidgetScreenState extends State<WidgetScreen> {
                         ),
                       ),
 
-                    const SizedBox(height: 28),
+                    SizedBox(height: 28.h),
 
                     // Results Section
                     // Placeholder loading state
@@ -366,8 +367,8 @@ class _WidgetScreenState extends State<WidgetScreen> {
                             children: List.generate(
                               3,
                               (index) => Container(
-                                height: 100,
-                                margin: const EdgeInsets.only(bottom: 12),
+                                height: 100.h,
+                                margin: EdgeInsets.only(bottom: 12.h),
                                 decoration: BoxDecoration(
                                   color: Colors.white,
                                   borderRadius: BorderRadius.circular(20),
@@ -383,13 +384,13 @@ class _WidgetScreenState extends State<WidgetScreen> {
                         child: Text(
                           "Choose Your Favorite",
                           style: GoogleFonts.poppins(
-                            fontSize: 20,
+                            fontSize: 20.sp,
                             fontWeight: FontWeight.bold,
                             color: AppColors.textPrimary,
                           ),
                         ),
                       ),
-                      const SizedBox(height: 16),
+                      SizedBox(height: 16.h),
                       ListView.separated(
                         key: ValueKey(
                           generatedQuotes.length +
@@ -401,7 +402,7 @@ class _WidgetScreenState extends State<WidgetScreen> {
                         physics: const NeverScrollableScrollPhysics(),
                         itemCount: generatedQuotes.length,
                         separatorBuilder: (context, index) =>
-                            const SizedBox(height: 12),
+                            SizedBox(height: 12.h),
                         itemBuilder: (context, index) {
                           return RepaintBoundary(
                             child: PremiumEntrance(
@@ -497,9 +498,9 @@ class _WidgetScreenState extends State<WidgetScreen> {
                                   await _handleWidgetSave(quote, widgetId);
                                 },
                                 child: Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 16,
-                                    vertical: 16,
+                                  padding: EdgeInsets.symmetric(
+                                    horizontal: 16.w,
+                                    vertical: 16.h,
                                   ),
                                   decoration: BoxDecoration(
                                     color: Colors.white,
@@ -510,8 +511,8 @@ class _WidgetScreenState extends State<WidgetScreen> {
                                     children: [
                                       // Subtle Number Indicator
                                       Container(
-                                        width: 24,
-                                        height: 24,
+                                        width: 24.w,
+                                        height: 24.h,
                                         decoration: BoxDecoration(
                                           color: AppColors.darkBackground
                                               .withValues(alpha: 0.05),
@@ -521,7 +522,7 @@ class _WidgetScreenState extends State<WidgetScreen> {
                                           child: Text(
                                             "${index + 1}",
                                             style: GoogleFonts.poppins(
-                                              fontSize: 10,
+                                              fontSize: 10.sp,
                                               fontWeight: FontWeight.bold,
                                               color: AppColors.textPrimary
                                                   .withValues(alpha: 0.4),
@@ -529,18 +530,18 @@ class _WidgetScreenState extends State<WidgetScreen> {
                                           ),
                                         ),
                                       ),
-                                      const SizedBox(width: 12),
+                                      SizedBox(width: 12.w),
                                       Expanded(
                                         child: Text(
                                           generatedQuotes[index],
                                           style: GoogleFonts.merriweather(
-                                            fontSize: 14,
+                                            fontSize: 14.sp,
                                             height: 1.5,
                                             color: AppColors.textPrimary,
                                           ),
                                         ),
                                       ),
-                                      const SizedBox(width: 12),
+                                      SizedBox(width: 12.w),
                                       CozyTapScale(
                                         onTap: () {
                                           showDialog(
@@ -552,15 +553,15 @@ class _WidgetScreenState extends State<WidgetScreen> {
                                         },
                                         child: Icon(
                                           Icons.outlined_flag,
-                                          size: 20,
+                                          size: 20.sp,
                                           color: AppColors.textPrimary
                                               .withValues(alpha: 0.15),
                                         ),
                                       ),
-                                      const SizedBox(width: 8),
+                                      SizedBox(width: 8.w),
                                       Icon(
                                         Icons.add_circle_outline,
-                                        size: 20,
+                                        size: 20.sp,
                                         color: AppColors.textPrimary.withValues(
                                           alpha: 0.15,
                                         ),

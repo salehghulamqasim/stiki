@@ -177,4 +177,49 @@ class StorageHelper {
       return newWidget;
     }
   }
+
+  // --- DAILY QUOTE FEATURE ---
+  static const _dailyQuoteKey = 'daily_quote_data';
+
+  static Future<Map<String, dynamic>?> getDailyQuote() async {
+    final prefs = await SharedPreferences.getInstance();
+    final jsonString = prefs.getString(_dailyQuoteKey);
+    if (jsonString == null) return null;
+    return jsonDecode(jsonString) as Map<String, dynamic>;
+  }
+
+  static Future<void> saveDailyQuote(String quote, String dateString) async {
+    final prefs = await SharedPreferences.getInstance();
+    final data = {'quote': quote, 'date': dateString};
+    await prefs.setString(_dailyQuoteKey, jsonEncode(data));
+  }
+
+  // --- BATCH CACHE FEATURE ---
+  static const _futureQuotesKey = 'future_quotes_cache';
+
+  // Save a list of new quotes to the cache
+  static Future<void> addFutureQuotes(List<String> newQuotes) async {
+    final prefs = await SharedPreferences.getInstance();
+    final current = await getFutureQuotes();
+    current.addAll(newQuotes);
+    await prefs.setStringList(_futureQuotesKey, current);
+  }
+
+  // Get current cache
+  static Future<List<String>> getFutureQuotes() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getStringList(_futureQuotesKey) ?? [];
+  }
+
+  // Get one quote and remove it from cache (Pop)
+  static Future<String?> popFutureQuote() async {
+    final prefs = await SharedPreferences.getInstance();
+    final current = await getFutureQuotes();
+
+    if (current.isEmpty) return null;
+
+    final quote = current.removeAt(0); // Take the first one
+    await prefs.setStringList(_futureQuotesKey, current); // Save updated list
+    return quote;
+  }
 }

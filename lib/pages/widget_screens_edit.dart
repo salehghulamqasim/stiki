@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+
 import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:stiki/animations/stiki_animations.dart';
 import 'package:stiki/models/widget_model.dart';
 import 'package:stiki/services/widget_service.dart';
+import 'package:stiki/utils/haptic_helper.dart';
 import 'package:stiki/utils/storage_helper.dart';
 import 'package:stiki/theme/app_colors.dart';
 
@@ -28,7 +30,7 @@ class _WidgetEditScreenState extends State<WidgetEditScreen> {
   }
 
   Future<void> _updateWidget() async {
-    HapticFeedback.vibrate();
+    HapticHelper.heavy();
 
     // 1. Save to Storage
     await StorageHelper.saveQuote(
@@ -69,7 +71,7 @@ class _WidgetEditScreenState extends State<WidgetEditScreen> {
       body: SafeArea(
         child: SingleChildScrollView(
           child: Padding(
-            padding: const EdgeInsets.all(24.0),
+            padding: EdgeInsets.all(16.r),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -80,21 +82,21 @@ class _WidgetEditScreenState extends State<WidgetEditScreen> {
                       Navigator.pop(context);
                     },
                     child: Container(
-                      padding: const EdgeInsets.all(12),
+                      padding: EdgeInsets.all(12.r),
                       decoration: BoxDecoration(
                         color: AppColors.darkBackground,
                         borderRadius: BorderRadius.circular(12),
                       ),
-                      child: const Icon(
+                      child: Icon(
                         Icons.arrow_back,
                         color: Colors.white,
-                        size: 20,
+                        size: 20.sp,
                       ),
                     ),
                   ),
                 ),
 
-                const SizedBox(height: 32),
+                SizedBox(height: 32.h),
                 PremiumEntrance(
                   index: 1,
                   child: Column(
@@ -103,7 +105,7 @@ class _WidgetEditScreenState extends State<WidgetEditScreen> {
                       Text(
                         "Modify Stiki",
                         style: GoogleFonts.poppins(
-                          fontSize: 32,
+                          fontSize: 32.sp,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -111,14 +113,14 @@ class _WidgetEditScreenState extends State<WidgetEditScreen> {
                         "Topic: ${widget.widget.topic}",
                         style: GoogleFonts.poppins(
                           color: AppColors.textSecondary,
-                          fontSize: 16,
+                          fontSize: 16.sp,
                         ),
                       ),
                     ],
                   ),
                 ),
 
-                const SizedBox(height: 32),
+                SizedBox(height: 32.h),
 
                 PremiumEntrance(
                   index: 2,
@@ -128,13 +130,13 @@ class _WidgetEditScreenState extends State<WidgetEditScreen> {
                       Text(
                         "Rotation Speed",
                         style: GoogleFonts.poppins(
-                          fontSize: 18,
+                          fontSize: 18.sp,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      const SizedBox(height: 12),
+                      SizedBox(height: 12.h),
                       Wrap(
-                        spacing: 8,
+                        spacing: 8.w,
                         children: ['hourly', 'daily', 'weekly'].map((freq) {
                           final isSel = _selectedFrequency == freq;
                           return CozyTapScale(
@@ -143,9 +145,9 @@ class _WidgetEditScreenState extends State<WidgetEditScreen> {
                             },
                             child: AnimatedContainer(
                               duration: const Duration(milliseconds: 300),
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 16,
-                                vertical: 8,
+                              padding: EdgeInsets.symmetric(
+                                horizontal: 16.w,
+                                vertical: 8.h,
                               ),
                               decoration: BoxDecoration(
                                 color: isSel ? Colors.black : Colors.white,
@@ -153,13 +155,15 @@ class _WidgetEditScreenState extends State<WidgetEditScreen> {
                                 border: isSel
                                     ? null
                                     : Border.all(
-                                        color: Colors.black.withValues(alpha: 0.1),
+                                        color: Colors.black.withValues(
+                                          alpha: 0.1,
+                                        ),
                                       ),
                               ),
                               child: Text(
                                 freq.toUpperCase(),
                                 style: GoogleFonts.poppins(
-                                  fontSize: 11,
+                                  fontSize: 11.sp,
                                   fontWeight: FontWeight.bold,
                                   color: isSel ? Colors.white : Colors.black,
                                 ),
@@ -172,23 +176,22 @@ class _WidgetEditScreenState extends State<WidgetEditScreen> {
                   ),
                 ),
 
-                const SizedBox(height: 32),
+                SizedBox(height: 32.h),
 
                 Text(
                   "Update Quote✨",
                   style: GoogleFonts.poppins(
-                    fontSize: 20,
+                    fontSize: 20.sp,
                     fontWeight: FontWeight.bold,
                     color: AppColors.textPrimary,
                   ),
                 ),
-                const SizedBox(height: 16),
+                SizedBox(height: 16.h),
                 ListView.separated(
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
                   itemCount: widget.widget.quotes.length,
-                  separatorBuilder: (context, index) =>
-                      const SizedBox(height: 12),
+                  separatorBuilder: (context, index) => SizedBox(height: 12.h),
                   itemBuilder: (context, index) {
                     final q = widget.widget.quotes[index];
                     final isSelected = _selectedQuote == q;
@@ -200,9 +203,9 @@ class _WidgetEditScreenState extends State<WidgetEditScreen> {
                         },
                         child: AnimatedContainer(
                           duration: const Duration(milliseconds: 400),
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 16,
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 16.w,
+                            vertical: 16.h,
                           ),
                           decoration: BoxDecoration(
                             color: isSelected
@@ -222,18 +225,20 @@ class _WidgetEditScreenState extends State<WidgetEditScreen> {
                                     color: isSelected
                                         ? AppColors.textLight
                                         : AppColors.textPrimary,
-                                    fontSize: 14,
+                                    fontSize: 14.sp,
                                   ),
                                 ),
                               ),
-                              const SizedBox(width: 12),
+                              SizedBox(width: 12.w),
                               Icon(
                                 isSelected
                                     ? Icons.check_circle
                                     : Icons.circle_outlined,
                                 color: isSelected
                                     ? AppColors.textLight
-                                    : AppColors.textPrimary.withValues(alpha: 0.2),
+                                    : AppColors.textPrimary.withValues(
+                                        alpha: 0.2,
+                                      ),
                               ),
                             ],
                           ),
@@ -243,13 +248,13 @@ class _WidgetEditScreenState extends State<WidgetEditScreen> {
                   },
                 ),
 
-                const SizedBox(height: 32),
+                SizedBox(height: 32.h),
 
                 CozyTapScale(
                   onTap: _updateWidget,
                   child: SizedBox(
                     width: double.infinity,
-                    height: 56,
+                    height: 56.h,
                     child: ElevatedButton(
                       onPressed: _updateWidget,
                       style: ElevatedButton.styleFrom(

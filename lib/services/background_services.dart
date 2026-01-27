@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:math';
 import 'package:workmanager/workmanager.dart';
 import 'package:stiki/utils/storage_helper.dart';
 import 'package:stiki/services/widget_service.dart';
@@ -40,9 +41,16 @@ class BackgroundService {
               "🔄 Rotating widget ${widget.id}. Time since last: $timeSinceLastUpdate",
             );
 
-            // Move to the NEXT quote in the list (Sequential)
-            // This ensures users see every quote and don't skip any if the phone was off
-            int nextIndex = (widget.currentIndex + 1) % widget.quotes.length;
+            // Move to a RANDOM quote (Shuffle)
+            // Ensure we don't pick the same one twice if possible
+            int nextIndex;
+            if (widget.quotes.length > 1) {
+              do {
+                nextIndex = Random().nextInt(widget.quotes.length);
+              } while (nextIndex == widget.currentIndex);
+            } else {
+              nextIndex = 0;
+            }
             final nextQuote = widget.quotes[nextIndex];
 
             // Determine theme colors dynamically from AppColors

@@ -4,6 +4,7 @@ import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:stiki/theme/app_colors.dart';
 import 'package:stiki/animations/stiki_animations.dart';
 import 'package:stiki/utils/haptic_helper.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class GeneratorWidget extends StatefulWidget {
   final bool isLoading;
@@ -44,7 +45,7 @@ class _GeneratorWidgetState extends State<GeneratorWidget> {
 
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(24),
+      padding: EdgeInsets.all(24.r),
       decoration: BoxDecoration(
         color: widget.backgroundColor,
         borderRadius: BorderRadius.circular(32),
@@ -52,7 +53,7 @@ class _GeneratorWidgetState extends State<GeneratorWidget> {
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.04),
             blurRadius: 20,
-            offset: const Offset(0, 8),
+            offset: Offset(0, 8.h),
           ),
         ],
       ),
@@ -62,16 +63,16 @@ class _GeneratorWidgetState extends State<GeneratorWidget> {
           Text(
             "Topic",
             style: GoogleFonts.varelaRound(
-              fontSize: 18,
+              fontSize: 18.sp,
               fontWeight: FontWeight.w600,
               color: labelColor,
             ),
           ),
-          const SizedBox(height: 12),
+          SizedBox(height: 12.h),
 
           TextField(
             controller: widget.controller,
-            style: GoogleFonts.poppins(fontSize: 16, color: contentColor),
+            style: GoogleFonts.poppins(fontSize: 16.sp, color: contentColor),
             decoration: InputDecoration(
               hintText: "e.g. Health & Fitness quotes",
               hintStyle: TextStyle(color: contentColor.withValues(alpha: 0.3)),
@@ -79,9 +80,9 @@ class _GeneratorWidgetState extends State<GeneratorWidget> {
               fillColor: isDark
                   ? Colors.white.withValues(alpha: 0.1)
                   : Colors.white.withValues(alpha: 0.5),
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 16,
-                vertical: 16,
+              contentPadding: EdgeInsets.symmetric(
+                horizontal: 16.w,
+                vertical: 16.h,
               ),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(16),
@@ -101,17 +102,17 @@ class _GeneratorWidgetState extends State<GeneratorWidget> {
             ),
           ),
 
-          const SizedBox(height: 24),
+          SizedBox(height: 24.h),
 
           Text(
             "Frequency",
             style: GoogleFonts.varelaRound(
-              fontSize: 18,
+              fontSize: 18.sp,
               fontWeight: FontWeight.w600,
               color: labelColor,
             ),
           ),
-          const SizedBox(height: 12),
+          SizedBox(height: 12.h),
 
           Row(
             children: [
@@ -122,7 +123,7 @@ class _GeneratorWidgetState extends State<GeneratorWidget> {
                 isDark,
                 contentColor,
               ),
-              const SizedBox(width: 8),
+              SizedBox(width: 8.w),
               _buildFrequencyOption(
                 context,
                 "daily",
@@ -130,7 +131,7 @@ class _GeneratorWidgetState extends State<GeneratorWidget> {
                 isDark,
                 contentColor,
               ),
-              const SizedBox(width: 8),
+              SizedBox(width: 8.w),
               _buildFrequencyOption(
                 context,
                 "weekly",
@@ -141,7 +142,7 @@ class _GeneratorWidgetState extends State<GeneratorWidget> {
             ],
           ),
 
-          const SizedBox(height: 32),
+          SizedBox(height: 32.h),
           Row(
             children: [
               GestureDetector(
@@ -156,11 +157,11 @@ class _GeneratorWidgetState extends State<GeneratorWidget> {
                   isDarkTheme: isDark,
                 ),
               ),
-              const SizedBox(width: 12),
+              SizedBox(width: 12.w),
               Text(
                 "DEEP MODE",
                 style: GoogleFonts.varelaRound(
-                  fontSize: 14,
+                  fontSize: 14.sp,
                   fontWeight: FontWeight.w700,
                   letterSpacing: 2,
                   color: labelColor,
@@ -168,7 +169,7 @@ class _GeneratorWidgetState extends State<GeneratorWidget> {
               ),
             ],
           ),
-          const SizedBox(height: 32),
+          SizedBox(height: 32.h),
 
           // FIXED: Button with proper loading animation
           CozyTapScale(
@@ -176,7 +177,7 @@ class _GeneratorWidgetState extends State<GeneratorWidget> {
             onTap: widget.isLoading ? null : widget.onTap,
             child: SizedBox(
               width: double.infinity,
-              height: 56,
+              height: 56.h,
               child: ElevatedButton(
                 onPressed: widget.isLoading ? null : widget.onTap,
                 style: ElevatedButton.styleFrom(
@@ -215,14 +216,14 @@ class _GeneratorWidgetState extends State<GeneratorWidget> {
                               ? AppColors.darkBackground
                               : AppColors.textLight,
                           // INCREASED: Size from 28 to 32 for better visibility
-                          size: 38,
+                          size: 38.sp,
                         )
                       : Text(
                           "Inspire Me ✨",
                           // ADDED: Key to help AnimatedSwitcher distinguish between states
                           key: const ValueKey('text'),
                           style: GoogleFonts.poppins(
-                            fontSize: 16,
+                            fontSize: 16.sp,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
@@ -242,9 +243,9 @@ class _GeneratorWidgetState extends State<GeneratorWidget> {
     return AnimatedContainer(
       duration: const Duration(milliseconds: 300),
       curve: Curves.easeInOut,
-      width: 48.0,
-      height: 28.0,
-      padding: const EdgeInsets.all(4.0),
+      width: 48.0.w,
+      height: 28.0.h,
+      padding: EdgeInsets.all(4.0.r),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(99.0),
         color: isDeepMode
@@ -258,8 +259,8 @@ class _GeneratorWidgetState extends State<GeneratorWidget> {
         curve: Curves.easeInOut,
         alignment: isDeepMode ? Alignment.centerRight : Alignment.centerLeft,
         child: Container(
-          width: 20.0,
-          height: 20.0,
+          width: 20.0.w,
+          height: 20.0.h,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             color: (isDarkTheme && isDeepMode)
@@ -270,7 +271,7 @@ class _GeneratorWidgetState extends State<GeneratorWidget> {
               BoxShadow(
                 color: Colors.black.withValues(alpha: 0.1),
                 blurRadius: 2,
-                offset: const Offset(0, 1),
+                offset: Offset(0, 1.h),
               ),
             ],
           ),
@@ -293,7 +294,7 @@ class _GeneratorWidgetState extends State<GeneratorWidget> {
       },
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 300),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
         decoration: BoxDecoration(
           color: isActive
               ? (isDark
@@ -312,7 +313,7 @@ class _GeneratorWidgetState extends State<GeneratorWidget> {
         child: Text(
           label,
           style: GoogleFonts.poppins(
-            fontSize: 12,
+            fontSize: 12.sp,
             fontWeight: isActive ? FontWeight.bold : FontWeight.w500,
             color: isActive
                 ? (isDark ? AppColors.darkBackground : AppColors.textPrimary)

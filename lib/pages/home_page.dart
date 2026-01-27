@@ -1,16 +1,18 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
-
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:stiki/components/widgets_options2.dart';
 import 'package:stiki/models/widget_model.dart';
 import 'package:stiki/pages/widget_screen.dart';
 import 'package:stiki/components/quote_card.dart';
 import 'package:stiki/pages/widget_screens_edit.dart';
+import 'package:stiki/utils/haptic_helper.dart';
 import 'package:stiki/utils/storage_helper.dart';
+import 'dart:async';
+import 'dart:math';
+import 'package:stiki/services/ai_service.dart';
 import 'package:stiki/theme/app_colors.dart';
 import 'package:home_widget/home_widget.dart';
-
 import 'package:stiki/animations/stiki_animations.dart';
 
 class HomePage extends StatefulWidget {
@@ -22,11 +24,130 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   List<QuoteWidget> mySavedWidgets = [];
+  String _displayQuote = "The best way to predict the future is to create it.";
+  String _quoteAuthor = "Stiki";
+  bool _isTyping = false;
 
   @override
   void initState() {
     super.initState();
     _loadSavedWidgets();
+    _checkDailyQuote();
+  }
+
+  // --- DAILY QUOTE LOGIC (Instant Update via Cache) ---
+  Future<void> _checkDailyQuote() async {
+    final savedData = await StorageHelper.getDailyQuote();
+    final today = DateTime.now().toIso8601String().split('T')[0];
+
+    // 1. Check if we already have today's quote (Production Logic)
+    if (savedData != null && savedData['date'] == today) {
+      if (mounted) {
+        setState(() {
+          _displayQuote = savedData['quote'];
+          _quoteAuthor = "Stiki Wisdom";
+          _quoteAuthor = "Stiki Wisdom";
+        });
+      }
+      _refillCacheIfNeeded(); // Check if we need to top up for tomorrow
+      return;
+    }
+
+    debugPrint("🧠 Daily quote needed. Checking cache...");
+
+    // 2. Try to get from Cache (INSTANT)
+    final cachedQuote = await StorageHelper.popFutureQuote();
+
+    if (cachedQuote != null) {
+      debugPrint("🚀 Cache HIT! Using pre-fetched quote.");
+      await StorageHelper.saveDailyQuote(cachedQuote, today);
+      final authors = ["Stiki Wisdom", "Mr. Stiki", "Stiki Intelligence"];
+
+      if (mounted) {
+        setState(() {
+          _displayQuote = cachedQuote;
+          _quoteAuthor = authors[Random().nextInt(authors.length)];
+        });
+      }
+      _refillCacheIfNeeded(); // Top up cache
+      return;
+    }
+
+    // 3. Cache Miss (First run or empty) - Fallback to Slow Fetch
+    debugPrint("🐢 Cache MISS. Performing live fetch...");
+    try {
+      final topics = [
+        "Wise life advice",
+        "Funny corporate joke",
+        "Mindfulness reminder",
+        "Motivational quote",
+        "Philosophy in one sentence",
+      ];
+      final topic = topics[Random().nextInt(topics.length)];
+
+      // Fetch ONE for now to show user ASAP
+      final quotes = await AiService().fetchQuotes(
+        topic + " (max 50 chars)",
+        useDeepMode: true,
+      );
+
+      // Strict Length Filtering
+      final validQuotes = quotes
+          .where((q) => q.length >= 10 && q.length <= 60)
+          .toList();
+
+      if (validQuotes.isNotEmpty) {
+        final quote = validQuotes.first;
+        await StorageHelper.saveDailyQuote(quote, today);
+        if (mounted) {
+          final authors = ["Stiki Wisdom", "Mr. Stiki", "Stiki Intelligence"];
+          setState(() {
+            _displayQuote = quote;
+            _quoteAuthor = authors[Random().nextInt(authors.length)];
+          });
+        }
+
+        // If we got extra quotes from this fetch, save them to cache!
+        if (validQuotes.length > 1) {
+          await StorageHelper.addFutureQuotes(validQuotes.sublist(1));
+        }
+      }
+
+      _refillCacheIfNeeded();
+    } catch (e) {
+      debugPrint("❌ Failed to fetch daily quote: $e");
+    }
+  }
+
+  // --- BACKGROUND REFILL (Silent) ---
+  Future<void> _refillCacheIfNeeded() async {
+    final cache = await StorageHelper.getFutureQuotes();
+    debugPrint("📦 Current Cache Size: ${cache.length}");
+
+    if (cache.length >= 3) return; // We have enough
+
+    debugPrint("♻️ Refilling Quote Cache silently...");
+    try {
+      // Fetch a BIG BATCH
+      final topics = ["Wisdom", "Funny", "Motivation", "Life"];
+      final topic = topics[Random().nextInt(topics.length)];
+
+      final quotes = await AiService().fetchQuotes(
+        "Mix of $topic quotes (10-50 chars)",
+        useDeepMode: true,
+      );
+
+      final validQuotes = quotes
+          .where((q) => q.length >= 10 && q.length <= 60)
+          .toList();
+
+      if (validQuotes.isNotEmpty) {
+        await StorageHelper.addFutureQuotes(validQuotes);
+        debugPrint("✅ Added ${validQuotes.length} quotes to cache!");
+      }
+    } catch (e) {
+      debugPrint("⚠️ Background refill failed: $e");
+    }
   }
 
   Future<void> _loadSavedWidgets() async {
@@ -70,7 +191,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> _deleteWidget(String id) async {
-    HapticFeedback.mediumImpact();
+    HapticHelper.medium();
     await StorageHelper.deleteQuote(id);
     _loadSavedWidgets();
   }
@@ -101,10 +222,7 @@ class _HomePageState extends State<HomePage> {
             child: SingleChildScrollView(
               physics: const BouncingScrollPhysics(),
               child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 24,
-                  vertical: 20,
-                ),
+                padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 20.h),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -119,17 +237,17 @@ class _HomePageState extends State<HomePage> {
                               "Stiki",
                               style: GoogleFonts.poppins(
                                 color: AppColors.textPrimary,
-                                fontSize: 32,
+                                fontSize: 32.sp,
                                 fontWeight: FontWeight.w700,
                                 letterSpacing: -0.5,
                               ),
                             ),
                           ),
-                          const SizedBox(height: 4),
+                          SizedBox(height: 4.h),
                           Text(
                             'YOUR DAILY SOUL SPACE',
                             style: TextStyle(
-                              fontSize: 10,
+                              fontSize: 10.sp,
                               color: Colors.grey,
                               letterSpacing: 1.2,
                               fontWeight: FontWeight.w500,
@@ -140,22 +258,21 @@ class _HomePageState extends State<HomePage> {
                       ),
                     ),
 
-                    const SizedBox(height: 32),
+                    SizedBox(height: 32.h),
 
                     PremiumEntrance(
                       index: 1,
                       child: CozyTapScale(
                         onTap: () {},
-                        child: const QuoteCard(
-                          quote:
-                              "The best way to predict the future is to create it.",
-                          author: "Peter Drucker",
+                        child: QuoteCard(
+                          quote: _displayQuote,
+                          author: _quoteAuthor,
                           backgroundColor: AppColors.yellowWidget,
                         ),
                       ),
                     ),
 
-                    const SizedBox(height: 48),
+                    SizedBox(height: 48.h),
 
                     PremiumEntrance(
                       index: 2,
@@ -164,7 +281,7 @@ class _HomePageState extends State<HomePage> {
                         child: Text(
                           "Create New",
                           style: GoogleFonts.poppins(
-                            fontSize: 18,
+                            fontSize: 18.sp,
                             fontWeight: FontWeight.w600,
                             color: AppColors.textPrimary,
                           ),
@@ -172,7 +289,7 @@ class _HomePageState extends State<HomePage> {
                       ),
                     ),
 
-                    const SizedBox(height: 20),
+                    SizedBox(height: 20.h),
                     Row(
                       children: [
                         Expanded(
@@ -201,7 +318,7 @@ class _HomePageState extends State<HomePage> {
                             ),
                           ),
                         ),
-                        const SizedBox(width: 16),
+                        SizedBox(width: 16.w),
                         Expanded(
                           child: PremiumEntrance(
                             index: 4,
@@ -230,7 +347,7 @@ class _HomePageState extends State<HomePage> {
                       ],
                     ),
 
-                    const SizedBox(height: 48),
+                    SizedBox(height: 48.h),
 
                     PremiumEntrance(
                       index: 5,
@@ -239,19 +356,19 @@ class _HomePageState extends State<HomePage> {
                         child: Text(
                           "My Widgets",
                           style: GoogleFonts.poppins(
-                            fontSize: 18,
+                            fontSize: 18.sp,
                             fontWeight: FontWeight.w600,
                             color: AppColors.textPrimary,
                           ),
                         ),
                       ),
                     ),
-                    const SizedBox(height: 20),
+                    SizedBox(height: 20.h),
 
                     if (mySavedWidgets.isEmpty)
                       Container(
                         width: double.infinity,
-                        padding: const EdgeInsets.symmetric(vertical: 40),
+                        padding: EdgeInsets.symmetric(vertical: 40.h),
                         child: PremiumEntrance(
                           index: 6,
                           child: Column(
@@ -267,7 +384,7 @@ class _HomePageState extends State<HomePage> {
                                 textAlign: TextAlign.center,
                                 style: GoogleFonts.poppins(
                                   color: Colors.black26,
-                                  fontSize: 13,
+                                  fontSize: 13.sp,
                                   height: 1.5,
                                 ),
                               ),
@@ -297,8 +414,8 @@ class _HomePageState extends State<HomePage> {
                                   _loadSavedWidgets();
                                 },
                                 child: Container(
-                                  margin: const EdgeInsets.only(bottom: 16),
-                                  padding: const EdgeInsets.all(20),
+                                  margin: EdgeInsets.only(bottom: 14.h),
+                                  padding: EdgeInsets.all(18.r),
                                   decoration: BoxDecoration(
                                     color: Colors.white,
                                     borderRadius: BorderRadius.circular(20),
@@ -314,8 +431,8 @@ class _HomePageState extends State<HomePage> {
                                             Text(
                                               item.quote,
                                               style: GoogleFonts.poppins(
-                                                fontSize: 16,
-                                                fontWeight: FontWeight.w600,
+                                                fontSize: 16.sp,
+                                                fontWeight: FontWeight.w500,
                                                 color: AppColors.textPrimary,
                                               ),
                                               maxLines: 2,
@@ -325,7 +442,7 @@ class _HomePageState extends State<HomePage> {
                                             Text(
                                               "Created ${item.createdAt.day}/${item.createdAt.month}/${item.createdAt.year}",
                                               style: GoogleFonts.poppins(
-                                                fontSize: 13,
+                                                fontSize: 13.sp,
                                                 color: AppColors.textSecondary,
                                               ),
                                             ),
@@ -347,7 +464,7 @@ class _HomePageState extends State<HomePage> {
                           );
                         },
                       ),
-                    const SizedBox(height: 32),
+                    SizedBox(height: 32.h),
                   ],
                 ),
               ),

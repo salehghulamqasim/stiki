@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:stiki/theme/app_colors.dart';
 
 class QuoteCard extends StatelessWidget {
@@ -20,7 +21,7 @@ class QuoteCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+      padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 32.h),
       decoration: BoxDecoration(
         color: backgroundColor,
         borderRadius: BorderRadius.circular(36), // Rounded corners like image
@@ -42,10 +43,7 @@ class QuoteCard extends StatelessWidget {
             children: [
               // "DAILY QUOTE" Badge
               Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 8,
-                ),
+                padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(20),
@@ -53,7 +51,7 @@ class QuoteCard extends StatelessWidget {
                 child: Text(
                   "DAILY QUOTE",
                   style: GoogleFonts.poppins(
-                    fontSize: 9,
+                    fontSize: 9.sp,
                     fontWeight: FontWeight.w700,
                     color: Colors.black.withValues(alpha: 0.6),
                     letterSpacing: 1.2,
@@ -64,18 +62,18 @@ class QuoteCard extends StatelessWidget {
               // Quote mark image
               Image.asset(
                 'assets/quote.png',
-                height: 52,
+                height: 52.h,
                 color: Colors.black.withValues(alpha: 0.15),
               ),
             ],
           ),
-          const SizedBox(height: 24),
+          SizedBox(height: 24.h),
 
           // The Quote Text
           Text(
             '"$quote"',
             style: GoogleFonts.merriweather(
-              fontSize: 22,
+              fontSize: 22.sp,
               fontWeight: FontWeight.w600,
               color: AppColors.textPrimary, // Dark charcoal
               height: 1.4, // Good line height for readability
@@ -84,11 +82,11 @@ class QuoteCard extends StatelessWidget {
 
           // The Author (if provided)
           if (author.isNotEmpty) ...[
-            const SizedBox(height: 20),
+            SizedBox(height: 20.h),
             Text(
               "— $author",
               style: GoogleFonts.poppins(
-                fontSize: 15,
+                fontSize: 15.sp,
                 fontWeight: FontWeight.w500,
                 color: AppColors.textSecondary, // Softer grey for author
               ),

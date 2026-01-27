@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+
 import 'package:stiki/utils/haptic_helper.dart';
 
 /// A collection of premium, cozy animations for the Stiki app.
