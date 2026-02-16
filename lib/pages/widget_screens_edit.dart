@@ -48,7 +48,6 @@ class _WidgetEditScreenState extends State<WidgetEditScreen> {
         });
       }
     } catch (e) {
-      debugPrint('⚠️ Could not refresh widget data: $e');
     }
   }
 
@@ -116,7 +115,6 @@ class _WidgetEditScreenState extends State<WidgetEditScreen> {
         });
       }
 
-      debugPrint('🔄 Widget ${w.id} rotated on tap (was overdue)');
     }
   }
 

@@ -78,22 +78,11 @@ class _MainAppState extends State<MainApp> {
   /// - If opened normally → show HomePage
   /// - If opened from a widget tap → show that widget's edit screen
   Future<Widget> _getStartPage() async {
-    debugPrint(
-      "🚀 _getStartPage called with startWidgetId: ${widget.startWidgetId}",
-    );
-
-    // Fast path: if there's no widget ID, we know we should just show the home page
-    // This avoids unnecessary async work and makes the app start faster
     if (widget.startWidgetId == null || widget.startWidgetId!.isEmpty) {
-      debugPrint("🏠 No widget ID, showing HomePage");
       return const HomePage();
     }
 
-    // If we got here, someone tapped a widget to open the app
-    // So we need to load (or create) the widget and show its edit screen
-    debugPrint("🔧 Loading widget with ID: ${widget.startWidgetId}");
     final target = await StorageHelper.getQuoteByIdOrNew(widget.startWidgetId!);
-    debugPrint("✅ Loaded widget: ${target.id}, showing WidgetEditScreen");
     return WidgetEditScreen(widget: target);
   }
 

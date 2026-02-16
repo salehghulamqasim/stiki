@@ -41,11 +41,9 @@ class AnimationSettings {
         devicePixelRatio < 2.0) {
       _reducedMotion = true;
       _maxStaggeredAnimations = 4;
-      debugPrint('⚡ Reduced motion enabled (budget device detected)');
     } else if (shortestSide < 1080) {
       // Mid-range: keep animations but limit stagger count
       _maxStaggeredAnimations = 6;
-      debugPrint('⚡ Mid-range device: limiting staggered animations');
     }
   }
 }

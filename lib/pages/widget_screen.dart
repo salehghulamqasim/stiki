@@ -453,9 +453,7 @@ class _WidgetScreenState extends State<WidgetScreen> {
                                           );
                                       widgetId = newWidget.androidWidgetId
                                           .toString();
-                                      debugPrint(
-                                        "✨ Discovered NEW widget ID: $widgetId",
-                                      );
+                                      // debugPrint removed
                                       break;
                                     } catch (_) {
                                       // Continue waiting

@@ -30,7 +30,7 @@ class _HomePageState extends State<HomePage> {
   List<QuoteWidget> mySavedWidgets = [];
   String _displayQuote = "The best way to predict the future is to create it.";
   String _quoteAuthor = "Stiki";
-  bool _isTyping = false;
+  final bool _isTyping = false;
 
   @override
   void initState() {
@@ -59,13 +59,11 @@ class _HomePageState extends State<HomePage> {
       return;
     }
 
-    debugPrint("🧠 Daily quote needed. Checking cache...");
 
     // 2. Try to get from Cache (INSTANT)
     final cachedQuote = await StorageHelper.popFutureQuote();
 
     if (cachedQuote != null) {
-      debugPrint("🚀 Cache HIT! Using pre-fetched quote.");
       await StorageHelper.saveDailyQuote(cachedQuote, today);
       final authors = ["Stiki Wisdom", "Mr. Stiki", "Stiki Intelligence"];
 
@@ -80,7 +78,6 @@ class _HomePageState extends State<HomePage> {
     }
 
     // 3. Cache Miss (First run or empty) - Fallback to Slow Fetch
-    debugPrint("🐢 Cache MISS. Performing live fetch...");
     try {
       final topics = [
         "Wise life advice",
@@ -93,7 +90,7 @@ class _HomePageState extends State<HomePage> {
 
       // Fetch ONE for now to show user ASAP
       final quotes = await AiService().fetchQuotes(
-        topic + " (max 50 chars)",
+        "$topic (max 50 chars)",
         useDeepMode: true,
       );
 
@@ -121,18 +118,15 @@ class _HomePageState extends State<HomePage> {
 
       _refillCacheIfNeeded();
     } catch (e) {
-      debugPrint("❌ Failed to fetch daily quote: $e");
     }
   }
 
   // --- BACKGROUND REFILL (Silent) ---
   Future<void> _refillCacheIfNeeded() async {
     final cache = await StorageHelper.getFutureQuotes();
-    debugPrint("📦 Current Cache Size: ${cache.length}");
 
     if (cache.length >= 3) return; // We have enough
 
-    debugPrint("♻️ Refilling Quote Cache silently...");
     try {
       // Fetch a BIG BATCH
       final topics = ["Wisdom", "Funny", "Motivation", "Life"];
@@ -149,10 +143,8 @@ class _HomePageState extends State<HomePage> {
 
       if (validQuotes.isNotEmpty) {
         await StorageHelper.addFutureQuotes(validQuotes);
-        debugPrint("✅ Added ${validQuotes.length} quotes to cache!");
       }
     } catch (e) {
-      debugPrint("⚠️ Background refill failed: $e");
     }
   }
 
@@ -174,7 +166,6 @@ class _HomePageState extends State<HomePage> {
 
       // 4. Clean up: Delete orphaned widgets from storage
       for (var orphan in orphanedWidgets) {
-        debugPrint("🧹 Cleaning up deleted widget: ${orphan.id}");
         await StorageHelper.deleteQuote(orphan.id);
       }
 
@@ -187,7 +178,6 @@ class _HomePageState extends State<HomePage> {
       });
     } catch (e) {
       // Fallback: If sync fails, just show what's in storage (current behavior)
-      debugPrint("⚠️ Widget sync failed: $e. Showing all saved widgets.");
       final saved = await StorageHelper.getQuotes();
       if (!mounted) return;
       setState(() {
@@ -223,9 +213,7 @@ class _HomePageState extends State<HomePage> {
         // Check if overdue
         final timeSinceLastUpdate = now.difference(w.lastUpdated);
         if (timeSinceLastUpdate >= interval) {
-          debugPrint(
-            '🔄 [Foreground] Rotating widget ${w.id} — overdue by ${timeSinceLastUpdate.inMinutes} mins',
-          );
+          // debugPrint removed
 
           // Pick a random different quote
           int nextIndex;
@@ -275,7 +263,6 @@ class _HomePageState extends State<HomePage> {
         _loadSavedWidgets();
       }
     } catch (e) {
-      debugPrint('⚠️ [Foreground] Rotation check failed: $e');
     }
   }
 
@@ -333,7 +320,6 @@ class _HomePageState extends State<HomePage> {
                     try {
                       await platform.invokeMethod('requestBatteryOptimization');
                     } catch (e) {
-                      debugPrint('⚠️ Battery opt failed: $e');
                     }
                   },
                   style: ElevatedButton.styleFrom(
