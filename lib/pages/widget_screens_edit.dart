@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
 
 import 'package:google_fonts/google_fonts.dart';
@@ -27,6 +28,75 @@ class _WidgetEditScreenState extends State<WidgetEditScreen> {
     super.initState();
     _selectedQuote = widget.widget.quote;
     _selectedFrequency = widget.widget.frequency;
+    _rotateIfOverdue();
+  }
+
+  /// Check if this widget is overdue for rotation and rotate if needed
+  Future<void> _rotateIfOverdue() async {
+    final w = widget.widget;
+    if (w.frequency == 'none' || w.quotes.length < 2) return;
+
+    Duration interval;
+    if (w.frequency == 'hourly') {
+      interval = const Duration(hours: 1);
+    } else if (w.frequency == 'daily') {
+      interval = const Duration(days: 1);
+    } else if (w.frequency == 'weekly') {
+      interval = const Duration(days: 7);
+    } else {
+      return;
+    }
+
+    final now = DateTime.now();
+    if (now.difference(w.lastUpdated) >= interval) {
+      // Pick a random different quote
+      int nextIndex;
+      int attempts = 0;
+      do {
+        nextIndex = Random().nextInt(w.quotes.length);
+        attempts++;
+      } while (nextIndex == w.currentIndex && attempts < 10);
+
+      final nextQuote = w.quotes[nextIndex];
+
+      // Determine colors
+      final bgColor = w.backgroundColor != null
+          ? Color(w.backgroundColor!)
+          : (w.widgetName.contains('Dark')
+                ? AppColors.darkBackground
+                : AppColors.yellowWidget);
+      final txtColor = w.textColor != null
+          ? Color(w.textColor!)
+          : (w.widgetName.contains('Dark')
+                ? AppColors.textLight
+                : AppColors.textPrimary);
+
+      // Update home screen widget
+      await WidgetService().updateStickyWidget(
+        text: nextQuote,
+        color: bgColor,
+        textColor: txtColor,
+        androidWidgetName: w.widgetName,
+        id: w.id,
+      );
+
+      // Save to storage
+      await StorageHelper.saveQuote(
+        nextQuote,
+        id: w.id,
+        currentIndex: nextIndex,
+        lastUpdated: now,
+      );
+
+      // Update the UI to reflect the new quote
+      if (mounted) {
+        setState(() {
+          _selectedQuote = nextQuote;
+        });
+      }
+
+      debugPrint('🔄 Widget ${w.id} rotated on tap (was overdue)');
+    }
   }
 
   Future<void> _updateWidget() async {

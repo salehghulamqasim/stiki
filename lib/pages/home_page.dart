@@ -10,7 +10,11 @@ import 'package:stiki/utils/haptic_helper.dart';
 import 'package:stiki/utils/storage_helper.dart';
 import 'dart:async';
 import 'dart:math';
+import 'dart:io';
+import 'package:flutter/services.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:stiki/services/ai_service.dart';
+import 'package:stiki/services/widget_service.dart';
 import 'package:stiki/theme/app_colors.dart';
 import 'package:home_widget/home_widget.dart';
 import 'package:stiki/animations/stiki_animations.dart';
@@ -33,6 +37,8 @@ class _HomePageState extends State<HomePage> {
     super.initState();
     _loadSavedWidgets();
     _checkDailyQuote();
+    _checkAndRotateOverdueWidgets();
+    _promptBatteryOptimization();
   }
 
   // --- DAILY QUOTE LOGIC (Instant Update via Cache) ---
@@ -188,6 +194,150 @@ class _HomePageState extends State<HomePage> {
         mySavedWidgets = saved;
       });
     }
+  }
+
+  // --- FOREGROUND ROTATION CHECK ---
+  // Runs when app opens. If WorkManager missed a rotation, this catches it.
+  Future<void> _checkAndRotateOverdueWidgets() async {
+    try {
+      final widgets = await StorageHelper.getQuotes();
+      final now = DateTime.now();
+      bool anyRotated = false;
+
+      for (var w in widgets) {
+        // Skip widgets that don't rotate or have too few quotes
+        if (w.frequency == 'none' || w.quotes.length < 2) continue;
+
+        // Determine required interval
+        Duration interval;
+        if (w.frequency == 'hourly') {
+          interval = const Duration(hours: 1);
+        } else if (w.frequency == 'daily') {
+          interval = const Duration(days: 1);
+        } else if (w.frequency == 'weekly') {
+          interval = const Duration(days: 7);
+        } else {
+          continue;
+        }
+
+        // Check if overdue
+        final timeSinceLastUpdate = now.difference(w.lastUpdated);
+        if (timeSinceLastUpdate >= interval) {
+          debugPrint(
+            '🔄 [Foreground] Rotating widget ${w.id} — overdue by ${timeSinceLastUpdate.inMinutes} mins',
+          );
+
+          // Pick a random different quote
+          int nextIndex;
+          int attempts = 0;
+          do {
+            nextIndex = Random().nextInt(w.quotes.length);
+            attempts++;
+          } while (nextIndex == w.currentIndex && attempts < 10);
+
+          final nextQuote = w.quotes[nextIndex];
+
+          // Determine widget colors
+          final bgColor = w.backgroundColor != null
+              ? Color(w.backgroundColor!)
+              : (w.widgetName.contains('Dark')
+                    ? AppColors.darkBackground
+                    : AppColors.yellowWidget);
+          final txtColor = w.textColor != null
+              ? Color(w.textColor!)
+              : (w.widgetName.contains('Dark')
+                    ? AppColors.textLight
+                    : AppColors.textPrimary);
+
+          // Update the home screen widget
+          await WidgetService().updateStickyWidget(
+            text: nextQuote,
+            color: bgColor,
+            textColor: txtColor,
+            androidWidgetName: w.widgetName,
+            id: w.id,
+          );
+
+          // Save to storage
+          await StorageHelper.saveQuote(
+            nextQuote,
+            id: w.id,
+            currentIndex: nextIndex,
+            lastUpdated: now,
+          );
+
+          anyRotated = true;
+        }
+      }
+
+      // Refresh the list if any widgets were rotated
+      if (anyRotated && mounted) {
+        _loadSavedWidgets();
+      }
+    } catch (e) {
+      debugPrint('⚠️ [Foreground] Rotation check failed: $e');
+    }
+  }
+
+  // --- BATTERY OPTIMIZATION PROMPT ---
+  // Ask user once to disable battery optimization so WorkManager runs reliably
+  Future<void> _promptBatteryOptimization() async {
+    if (!Platform.isAndroid) return;
+
+    // Only ask once
+    final prefs = await SharedPreferences.getInstance();
+    final alreadyAsked = prefs.getBool('battery_opt_asked') ?? false;
+    if (alreadyAsked) return;
+
+    // Wait for the UI to settle before showing dialog
+    await Future.delayed(const Duration(seconds: 3));
+    if (!mounted) return;
+
+    await showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Text(
+          'Keep Quotes Fresh 🔄',
+          style: GoogleFonts.poppins(fontWeight: FontWeight.bold),
+        ),
+        content: Text(
+          'To ensure your widget quotes rotate on time, please disable battery optimization for Stiki.\n\nThis lets the app refresh quotes in the background.',
+          style: GoogleFonts.poppins(fontSize: 14, height: 1.5),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text('Later', style: GoogleFonts.poppins()),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              Navigator.pop(ctx);
+              // Open Android battery optimization settings for this app
+              const platform = MethodChannel('com.stiki.app/battery');
+              try {
+                await platform.invokeMethod('requestBatteryOptimization');
+              } catch (e) {
+                debugPrint('⚠️ Battery optimization request failed: $e');
+              }
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.darkBackground,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            child: Text(
+              'Open Settings',
+              style: GoogleFonts.poppins(color: Colors.white),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    // Mark as asked regardless of choice
+    await prefs.setBool('battery_opt_asked', true);
   }
 
   Future<void> _deleteWidget(String id) async {

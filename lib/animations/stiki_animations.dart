@@ -36,7 +36,7 @@ class AnimationSettings {
 
     // Budget phones often have: small logical screen OR low pixel ratio
     // Infinix, Tecno, early Samsung A-series typically fall here
-    if (shortestSide < 720 ||
+    if (shortestSide <= 720 ||
         logicalShortSide < 360 ||
         devicePixelRatio < 2.0) {
       _reducedMotion = true;
@@ -84,8 +84,10 @@ class _PremiumEntranceState extends State<PremiumEntrance>
   void initState() {
     super.initState();
 
-    // Performance optimization: skip animation for items beyond threshold
-    if (widget.index >= AnimationSettings.maxStaggeredAnimations) {
+    // Performance optimization: skip animation entirely on budget devices
+    // or for items beyond stagger threshold
+    if (AnimationSettings.reducedMotion ||
+        widget.index >= AnimationSettings.maxStaggeredAnimations) {
       _skipAnimation = true;
       _controller = AnimationController(vsync: this, duration: Duration.zero);
       _opacityAnimation = AlwaysStoppedAnimation(1.0);
@@ -94,10 +96,7 @@ class _PremiumEntranceState extends State<PremiumEntrance>
       return;
     }
 
-    // Reduce duration on lower-end devices
-    final effectiveDuration = AnimationSettings.reducedMotion
-        ? Duration(milliseconds: (widget.duration.inMilliseconds * 0.6).round())
-        : widget.duration;
+    final effectiveDuration = widget.duration;
 
     _controller = AnimationController(vsync: this, duration: effectiveDuration);
 
@@ -114,21 +113,14 @@ class _PremiumEntranceState extends State<PremiumEntrance>
       ),
     );
 
-    // Reduce scale animation on lower-end devices (less GPU work)
-    final scaleStart = AnimationSettings.reducedMotion ? 0.96 : 0.92;
-    _scaleAnimation = Tween<double>(begin: scaleStart, end: 1.0).animate(curve);
+    _scaleAnimation = Tween<double>(begin: 0.92, end: 1.0).animate(curve);
 
-    // Reduce slide distance on lower-end devices
-    final effectiveOffset = AnimationSettings.reducedMotion
-        ? Offset(widget.slideOffset.dx * 0.5, widget.slideOffset.dy * 0.5)
-        : widget.slideOffset;
     _slideAnimation = Tween<Offset>(
-      begin: effectiveOffset,
+      begin: widget.slideOffset,
       end: Offset.zero,
     ).animate(curve);
 
-    // Reduce stagger delay on lower-end devices
-    final staggerDelay = AnimationSettings.reducedMotion ? 50 : 100;
+    final staggerDelay = 100;
 
     // Start with a staggered delay
     Future.delayed(
