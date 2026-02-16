@@ -21,11 +21,25 @@ class AppInitializer {
       } else {
         return;
       }
-      final String widgetId = parsedUri.authority;
+
+      String widgetId = parsedUri.authority;
+      // Handle URI format: stiki://widget/<id>
+      if (widgetId == 'widget' && parsedUri.pathSegments.isNotEmpty) {
+        widgetId = parsedUri.pathSegments.last;
+      }
+
       NavigationHelper.navigateToWidget(widgetId);
     });
 
     final Uri? launchedUri = await HomeWidget.initiallyLaunchedFromHomeWidget();
-    return launchedUri?.authority;
+    if (launchedUri != null) {
+      String widgetId = launchedUri.authority;
+      // Handle URI format: stiki://widget/<id>
+      if (widgetId == 'widget' && launchedUri.pathSegments.isNotEmpty) {
+        widgetId = launchedUri.pathSegments.last;
+      }
+      return widgetId;
+    }
+    return null;
   }
 }
