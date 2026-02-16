@@ -25,43 +25,59 @@ class AppColors {
   static const Color honeyWidget = Color(0xFFFFF1A8);
   static const Color honeyTextColor = Color(0xFF3D3520);
 
-  // 2. Sage - calming muted green
-  static const Color sageWidget = Color(0xFFB8C9A8);
-  static const Color sageTextColor = Color(0xFF2D3B2D);
+  // 2. Sage - calming green
+  static const Color sageWidget = Color(0xFFD7E8CD);
+  static const Color sageTextColor = Color(0xFF2E462F);
 
-  // 3. Coral - warm peachy red
-  static const Color coralWidget = Color(0xFFE8A89C);
-  static const Color coralTextColor = Color(0xFF4A2525);
+  // 3. Mist - sophisticated blue-grey (Replacing Slate)
+  static const Color mistWidget = Color(0xFFCFD8DC);
+  static const Color mistTextColor = Color(0xFF37474F);
 
-  // 4. Sky - soft blue
-  static const Color skyWidget = Color(0xFFA8C8E8);
-  static const Color skyTextColor = Color(0xFF1E3A5F);
+  // 4. Ice - fresh cool blue
+  static const Color iceWidget = Color(0xFFE1F5FE);
+  static const Color iceTextColor = Color(0xFF0277BD);
 
-  // 5. Lavender - gentle purple
-  static const Color lavenderWidget = Color(0xFFBEB0D8);
-  static const Color lavenderTextColor = Color(0xFF3A2D5A);
+  // 5. Lilac - romantic purple
+  static const Color lilacWidget = Color(0xFFF3E5F5);
+  static const Color lilacTextColor = Color(0xFF7B1FA2);
 
-  // 6. Mint - fresh green
-  static const Color mintWidget = Color(0xFFA8E8D0);
-  static const Color mintTextColor = Color(0xFF1E4A3A);
+  // 6. Rose - soft pink
+  static const Color roseWidget = Color(0xFFFFEBEE);
+  static const Color roseTextColor = Color(0xFFC62828);
 
-  // 7. Blush - soft pink
-  static const Color blushWidget = Color(0xFFF0B8C8);
-  static const Color blushTextColor = Color(0xFF5A2D3A);
+  // 7. Peach - warm glow
+  static const Color peachWidget = Color(0xFFFFCCBC);
+  static const Color peachTextColor = Color(0xFFBF360C);
 
-  // 8. Peach - warm orange
-  static const Color peachWidget = Color(0xFFF8C8A0);
-  static const Color peachTextColor = Color(0xFF4A2D1E);
+  // 8. Sand - earthy neutral
+  static const Color sandWidget = Color(0xFFD7CCC8);
+  static const Color sandTextColor = Color(0xFF4E342E);
 
-  // 9. Slate - cool sophisticated gray
-  static const Color slateWidget = Color(0xFFB8C0C8);
-  static const Color slateTextColor = Color(0xFF2D3540);
+  // 9. Cream - clean minimalist
+  static const Color creamWidget = Color(0xFFFAFAFA);
+  static const Color creamTextColor = Color(0xFF212121);
 
-  // 10. Cream - warm off-white
-  static const Color creamWidget = Color(0xFFF5F0E0);
-  static const Color creamTextColor = Color(0xFF3D3830);
+  // 10. Midnight - deep aesthetic blue
+  static const Color midnightWidget = Color(0xFF283593);
+  static const Color midnightTextColor = Colors.white;
 
-  // 11. Glass/Transparent - semi-transparent
+  // 11. Forest - rich green
+  static const Color forestWidget = Color(0xFF2E7D32);
+  static const Color forestTextColor = Colors.white;
+
+  // 12. Espresso - dark coffee
+  static const Color espressoWidget = Color(0xFF4E342E);
+  static const Color espressoTextColor = Colors.white;
+
+  // 13. Charcoal - modern dark
+  static const Color charcoalWidget = Color(0xFF37474F);
+  static const Color charcoalTextColor = Colors.white;
+
+  // 14. Rouge - vintage dark red
+  static const Color rougeWidget = Color(0xFFC62828);
+  static const Color rougeTextColor = Colors.white;
+
+  // Glass - semi-transparent
   static const Color glassWidget = Color(0x80FFFFFF);
   static const Color glassTextColor = Color(0xFF221A16);
 
