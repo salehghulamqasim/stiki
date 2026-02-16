@@ -59,7 +59,6 @@ class _HomePageState extends State<HomePage> {
       return;
     }
 
-
     // 2. Try to get from Cache (INSTANT)
     final cachedQuote = await StorageHelper.popFutureQuote();
 
@@ -94,30 +93,56 @@ class _HomePageState extends State<HomePage> {
         useDeepMode: true,
       );
 
-      // Strict Length Filtering
+      // Strict Validation: Length & Filter out API Error messages
       final validQuotes = quotes
-          .where((q) => q.length >= 10 && q.length <= 60)
+          .where(
+            (q) =>
+                q.length >= 10 &&
+                q.length <= 80 &&
+                !q.toLowerCase().contains("error") &&
+                !q.toLowerCase().contains("unable to") &&
+                !q.toLowerCase().contains("connection"),
+          )
           .toList();
 
-      if (validQuotes.isNotEmpty) {
-        final quote = validQuotes.first;
-        await StorageHelper.saveDailyQuote(quote, today);
-        if (mounted) {
-          final authors = ["Stiki Wisdom", "Mr. Stiki", "Stiki Intelligence"];
-          setState(() {
-            _displayQuote = quote;
-            _quoteAuthor = authors[Random().nextInt(authors.length)];
-          });
-        }
+      String finalQuote;
 
+      if (validQuotes.isNotEmpty) {
+        finalQuote = validQuotes.first;
         // If we got extra quotes from this fetch, save them to cache!
         if (validQuotes.length > 1) {
           await StorageHelper.addFutureQuotes(validQuotes.sublist(1));
         }
+      } else {
+        // FALLBACK: Use offline safe quotes if API failed or returned errors
+        final fallbacks = [
+          "Believe you can and you're halfway there.",
+          "Act as if what you do makes a difference.",
+          "Success is not final, failure is not fatal.",
+          "You are never too old to set another goal.",
+          "Keep your face always toward the sunshine.",
+          "The only way to do great work is to love it.",
+          "Dream big and dare to fail.",
+          "Life is 10% what happens to us and 90% how we react.",
+          "Simplification is the ultimate sophistication.",
+        ];
+        finalQuote = fallbacks[Random().nextInt(fallbacks.length)];
+      }
+
+      // Save valid result (or fallback) so we don't retry today
+      await StorageHelper.saveDailyQuote(finalQuote, today);
+
+      if (mounted) {
+        final authors = ["Stiki Wisdom", "Mr. Stiki", "Stiki Intelligence"];
+        setState(() {
+          _displayQuote = finalQuote;
+          _quoteAuthor = authors[Random().nextInt(authors.length)];
+        });
       }
 
       _refillCacheIfNeeded();
     } catch (e) {
+      // Logic failure? Fallback silently to initial default or previous state
     }
   }
 
@@ -144,8 +169,7 @@ class _HomePageState extends State<HomePage> {
       if (validQuotes.isNotEmpty) {
         await StorageHelper.addFutureQuotes(validQuotes);
       }
-    } catch (e) {
-    }
+    } catch (e) {}
   }
 
   Future<void> _loadSavedWidgets() async {
@@ -262,8 +286,7 @@ class _HomePageState extends State<HomePage> {
       if (anyRotated && mounted) {
         _loadSavedWidgets();
       }
-    } catch (e) {
-    }
+    } catch (e) {}
   }
 
   // --- BATTERY OPTIMIZATION PROMPT ---
@@ -319,8 +342,7 @@ class _HomePageState extends State<HomePage> {
                     const platform = MethodChannel('com.stiki.app/battery');
                     try {
                       await platform.invokeMethod('requestBatteryOptimization');
-                    } catch (e) {
-                    }
+                    } catch (e) {}
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.darkBackground,
