@@ -351,7 +351,12 @@ class EnhancedStarPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(EnhancedStarPainter oldDelegate) => true;
+  bool shouldRepaint(EnhancedStarPainter oldDelegate) =>
+      oldDelegate.blur != blur ||
+      oldDelegate.stretchFactor != stretchFactor ||
+      oldDelegate.explosionProgress != explosionProgress ||
+      oldDelegate.particleSpread != particleSpread ||
+      oldDelegate.glowIntensity != glowIntensity;
 }
 
 // Usage

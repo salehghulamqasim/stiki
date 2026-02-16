@@ -10,6 +10,7 @@ import 'package:stiki/pages/home_page.dart';
 import 'package:stiki/pages/widget_screens_edit.dart';
 import 'package:stiki/utils/storage_helper.dart';
 import 'package:stiki/theme/app_colors.dart';
+import 'package:stiki/animations/stiki_animations.dart';
 
 void main() async {
   // This line is required - it tells Flutter to set up the framework
@@ -18,6 +19,9 @@ void main() async {
   // Set up all the background services, listeners, and other setup stuff
   // This also checks if the app was opened by tapping a widget
   final widgetId = await AppInitializer.initialize();
+
+  // Detect if device needs reduced animations (budget phones like Infinix)
+  AnimationSettings.autoDetectPerformance();
 
   // Finally, start the app! This creates the MainApp widget and shows it on screen
   runApp(MainApp(startWidgetId: widgetId));

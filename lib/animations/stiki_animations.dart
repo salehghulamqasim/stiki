@@ -26,14 +26,26 @@ class AnimationSettings {
 
   /// Auto-detect if device needs reduced animations (call on app start)
   static void autoDetectPerformance() {
-    // This is a simple heuristic - in production, you might use
-    // device_info_plus to check for specific low-end devices
     final dispatcher = WidgetsBinding.instance.platformDispatcher;
     final view = dispatcher.views.first;
-    if (view.physicalSize.shortestSide < 720) {
-      // Likely a lower-end device with smaller screen
+
+    // Check screen size AND pixel density as proxy for device tier
+    final shortestSide = view.physicalSize.shortestSide;
+    final devicePixelRatio = view.devicePixelRatio;
+    final logicalShortSide = shortestSide / devicePixelRatio;
+
+    // Budget phones often have: small logical screen OR low pixel ratio
+    // Infinix, Tecno, early Samsung A-series typically fall here
+    if (shortestSide < 720 ||
+        logicalShortSide < 360 ||
+        devicePixelRatio < 2.0) {
       _reducedMotion = true;
-      _maxStaggeredAnimations = 5;
+      _maxStaggeredAnimations = 4;
+      debugPrint('⚡ Reduced motion enabled (budget device detected)');
+    } else if (shortestSide < 1080) {
+      // Mid-range: keep animations but limit stagger count
+      _maxStaggeredAnimations = 6;
+      debugPrint('⚡ Mid-range device: limiting staggered animations');
     }
   }
 }
@@ -145,18 +157,20 @@ class _PremiumEntranceState extends State<PremiumEntrance>
       return RepaintBoundary(child: widget.child);
     }
 
-    return AnimatedBuilder(
-      animation: _controller,
-      builder: (context, child) {
-        return Opacity(
-          opacity: _opacityAnimation.value,
-          child: Transform.translate(
+    // Use FadeTransition instead of Opacity widget — much cheaper on GPU
+    // Opacity creates an offscreen buffer; FadeTransition uses alpha blending directly
+    return FadeTransition(
+      opacity: _opacityAnimation,
+      child: AnimatedBuilder(
+        animation: _controller,
+        builder: (context, child) {
+          return Transform.translate(
             offset: _slideAnimation.value,
             child: Transform.scale(scale: _scaleAnimation.value, child: child),
-          ),
-        );
-      },
-      child: RepaintBoundary(child: widget.child),
+          );
+        },
+        child: RepaintBoundary(child: widget.child),
+      ),
     );
   }
 }
@@ -288,18 +302,18 @@ class _CreationEntranceState extends State<CreationEntrance>
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: _controller,
-      builder: (context, child) {
-        return Opacity(
-          opacity: _opacityAnimation.value,
-          child: Transform.rotate(
+    return FadeTransition(
+      opacity: _opacityAnimation,
+      child: AnimatedBuilder(
+        animation: _controller,
+        builder: (context, child) {
+          return Transform.rotate(
             angle: _rotationAnimation.value,
             child: Transform.scale(scale: _scaleAnimation.value, child: child),
-          ),
-        );
-      },
-      child: RepaintBoundary(child: widget.child),
+          );
+        },
+        child: RepaintBoundary(child: widget.child),
+      ),
     );
   }
 }
@@ -442,19 +456,13 @@ class _SlideHideState extends State<SlideHide>
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: _controller,
-      builder: (context, child) {
-        return Opacity(
-          opacity: _opacityAnimation.value,
-          child: SizeTransition(
-            sizeFactor: _sizeAnimation,
-            axisAlignment: 0.0,
-            child: child,
-          ),
-        );
-      },
-      child: widget.child,
+    return FadeTransition(
+      opacity: _opacityAnimation,
+      child: SizeTransition(
+        sizeFactor: _sizeAnimation,
+        axisAlignment: 0.0,
+        child: widget.child,
+      ),
     );
   }
 }
@@ -486,7 +494,7 @@ class PageTransitionHelper {
           ),
         );
       },
-      transitionDuration: const Duration(milliseconds: 600),
+      transitionDuration: const Duration(milliseconds: 350),
     );
   }
 }
