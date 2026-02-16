@@ -10,7 +10,9 @@ class QuoteWidget {
   final int currentIndex; // Which of the 10 quotes is currently being shown
   final String widgetName; // 'StikiWidgetLight' or 'StikiWidgetDark'
   final DateTime createdAt;
-  final DateTime lastUpdated; // New: Tracks when we last rotated or edited
+  final DateTime lastUpdated;
+  final int? backgroundColor; // Stored color value for background
+  final int? textColor; // Stored color value for text
 
   QuoteWidget({
     required this.id,
@@ -22,6 +24,8 @@ class QuoteWidget {
     required this.widgetName,
     required this.createdAt,
     required this.lastUpdated,
+    this.backgroundColor,
+    this.textColor,
   });
 
   // This converts our object into a Map so it can be saved in SharedPreferences
@@ -35,6 +39,8 @@ class QuoteWidget {
     'widgetName': widgetName,
     'createdAt': createdAt.toIso8601String(),
     'lastUpdated': lastUpdated.toIso8601String(),
+    'backgroundColor': backgroundColor,
+    'textColor': textColor,
   };
 
   // This creates the object back from the map when we read it from storage
@@ -49,10 +55,11 @@ class QuoteWidget {
       currentIndex: json['currentIndex'] ?? 0,
       widgetName: json['widgetName'] ?? 'StikiWidgetLight',
       createdAt: createdAt,
-      // Migration: Use createdAt if lastUpdated doesn't exist yet
       lastUpdated: json['lastUpdated'] != null
           ? DateTime.parse(json['lastUpdated'] as String)
           : createdAt,
+      backgroundColor: json['backgroundColor'] as int?,
+      textColor: json['textColor'] as int?,
     );
   }
 }

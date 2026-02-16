@@ -20,8 +20,10 @@ class StorageHelper {
     String topic = '',
     String frequency = 'none',
     int? currentIndex, // Changed from int currentIndex = 0 => int?
-    String? widgetName, // ⬅️ Add this
-    DateTime? lastUpdated, // ⬅️ Add this
+    String? widgetName,
+    DateTime? lastUpdated,
+    int? backgroundColor,
+    int? textColor,
   }) async {
     final prefs = await SharedPreferences.getInstance();
     final allWidgets = await getQuotes();
@@ -42,12 +44,12 @@ class StorageHelper {
           frequency: frequency != 'none'
               ? frequency
               : allWidgets[index].frequency,
-          currentIndex:
-              currentIndex ?? allWidgets[index].currentIndex, // Fix here
-          widgetName:
-              widgetName ?? allWidgets[index].widgetName, // ⬅️ Keep old if null
+          currentIndex: currentIndex ?? allWidgets[index].currentIndex,
+          widgetName: widgetName ?? allWidgets[index].widgetName,
           createdAt: allWidgets[index].createdAt,
           lastUpdated: lastUpdated ?? DateTime.now(),
+          backgroundColor: backgroundColor ?? allWidgets[index].backgroundColor,
+          textColor: textColor ?? allWidgets[index].textColor,
         );
         debugPrint('💾 Updated existing widget with id: $id');
       } else {
@@ -62,6 +64,8 @@ class StorageHelper {
             widgetName: widgetName ?? 'StikiWidgetLight',
             createdAt: DateTime.now(),
             lastUpdated: lastUpdated ?? DateTime.now(),
+            backgroundColor: backgroundColor,
+            textColor: textColor,
           ),
         );
         debugPrint('💾 Added new widget with id: $id');
@@ -78,6 +82,8 @@ class StorageHelper {
           widgetName: widgetName ?? 'StikiWidgetLight', // ⬅️ Default to Light
           createdAt: DateTime.now(),
           lastUpdated: lastUpdated ?? DateTime.now(),
+          backgroundColor: backgroundColor,
+          textColor: textColor,
         ),
       );
       debugPrint('💾 Added new widget with random UUID');

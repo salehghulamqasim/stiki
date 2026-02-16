@@ -2,6 +2,7 @@
 // It's like the main door to your house. Everything starts here.
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:dynamic_color/dynamic_color.dart';
 import 'package:stiki/utils/app_initialization.dart';
 import 'package:stiki/utils/navigation_helper.dart';
 import 'package:stiki/pages/home_page.dart';
@@ -94,20 +95,39 @@ class _MainAppState extends State<MainApp> {
 
   @override
   Widget build(BuildContext context) {
-    return ScreenUtilInit(
-      designSize: const Size(390, 844),
-      minTextAdapt: true,
-      splitScreenMode: true,
-      builder: (context, child) {
-        return MaterialApp(
-          // This key lets us navigate from anywhere in the app (like when a widget is tapped)
-          navigatorKey: NavigationHelper.navigatorKey,
-          // Hide the debug banner in the top right corner
-          debugShowCheckedModeBanner: false,
-          // Show the initial page, or an empty scaffold while we're still loading
-          home: _initialPage == null
-              ? Scaffold(backgroundColor: AppColors.background)
-              : _initialPage!,
+    return DynamicColorBuilder(
+      builder: (ColorScheme? lightDynamic, ColorScheme? darkDynamic) {
+        // Store dynamic colors in AppColors for use throughout the app
+        if (darkDynamic != null) {
+          AppColors.setDynamicColors(
+            darkDynamic.surfaceContainer, // Darker surface for widget
+            darkDynamic.onSurface,
+          );
+        }
+        if (lightDynamic != null) {
+          AppColors.setDynamicLightColors(
+            lightDynamic
+                .primaryContainer, // Distinct primary container for light widget
+            lightDynamic.onPrimaryContainer,
+          );
+        }
+
+        return ScreenUtilInit(
+          designSize: const Size(390, 844),
+          minTextAdapt: true,
+          splitScreenMode: true,
+          builder: (context, child) {
+            return MaterialApp(
+              // This key lets us navigate from anywhere in the app (like when a widget is tapped)
+              navigatorKey: NavigationHelper.navigatorKey,
+              // Hide the debug banner in the top right corner
+              debugShowCheckedModeBanner: false,
+              // Show the initial page, or an empty scaffold while we're still loading
+              home: _initialPage == null
+                  ? Scaffold(backgroundColor: AppColors.background)
+                  : _initialPage!,
+            );
+          },
         );
       },
     );

@@ -22,7 +22,12 @@ class AiService {
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
 
-        // For debugging: debugPrint("MODEL REPLIED: ${data['modelUsed']}");
+        // --- DEBUG SECTION ---
+        // This will print exactly which model responded (V3 or R1)
+        String modelUsed = data['modelUsed'] ?? "Unknown Model";
+        print("----------------------------");
+        print("MODEL REPLIED: $modelUsed");
+        print("----------------------------");
 
         // Extract content from ai response structure
         String fullText = data['choices']?[0]?['message']?['content'] ?? "";

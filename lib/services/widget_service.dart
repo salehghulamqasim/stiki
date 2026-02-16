@@ -1,20 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:home_widget/home_widget.dart';
-import 'package:stiki/components/note_card.dart';
 
-/// usually taking job outside my app like to home widget
-/// thsi file has code service for sendTextnote and sendWeatherNote
-/// ----- saveWidgetData, renderFlutterWidget, updateWidget -----
-/// -----
-/// saveWidgetData= puts text color into shared box that both flutter and phone can see
-/// renderFlutterWidget= it takes noteCard and send it to phone to make exact looking of it
-/// updateWidget= rings the doorbell on phone to say hey the data changed go look in the box and update it
-/// -------
-
+/// Widget Service for updating Android home screen widgets
+/// Uses native Android auto-sizing text instead of Flutter image rendering
+/// This ensures text never overflows regardless of widget resize
 class WidgetService {
-  // 1. Give it a name (we will use this in the native settings later)
   static const String androidWidgetName = 'StikiWidget';
 
+  /// Convert Flutter Color to hex string for Android
+  String _colorToHex(Color color) {
+    return '#${color.value.toRadixString(16).substring(2).toUpperCase()}';
+  }
+
+  /// Update widget with native text rendering
+  /// Text will auto-size based on widget dimensions
   Future<void> updateStickyWidget({
     required String text,
     required Color color,
@@ -25,40 +24,42 @@ class WidgetService {
     try {
       debugPrint("🔧 updateStickyWidget called with id: $id");
 
-      // Save the widget ID for click handling (using instance ID)
+      // Save widget ID for click handling
       await HomeWidget.saveWidgetData('widget_id_$id', id);
 
-      // Render the widget screenshot with instance-specific key
-      debugPrint("🎨 Rendering widget to key: note_screenshot_$id");
-      await HomeWidget.renderFlutterWidget(
-        Directionality(
-          textDirection: TextDirection.ltr,
-          child: Material(
-            color: Colors.transparent,
-            child: NoteCard(text: text, color: color, textColor: textColor),
-          ),
-        ),
-        key: 'note_screenshot_$id',
-        logicalSize: const Size(200, 200),
+      // Save text for native Android TextView
+      await HomeWidget.saveWidgetData('widget_text_$id', text);
+
+      // Save colors as hex strings for Android
+      await HomeWidget.saveWidgetData(
+        'widget_bg_color_$id',
+        _colorToHex(color),
+      );
+      await HomeWidget.saveWidgetData(
+        'widget_text_color_$id',
+        _colorToHex(textColor),
       );
 
-      // Trigger widget update for BOTH providers to be safe
-      // This ensures the correct widget updates regardless of our detection logic
+      debugPrint(
+        "📝 Saved widget data: text='$text', bg=${_colorToHex(color)}, text=${_colorToHex(textColor)}",
+      );
+
+      // Trigger widget update
       await HomeWidget.updateWidget(
         name: androidWidgetName,
         androidName: androidWidgetName,
       );
 
       debugPrint("✅ Widget update complete for id: $id");
-    } catch (e) {
-      debugPrint("Error: $e");
+    } catch (e, stack) {
+      debugPrint("❌ Widget update error: $e");
+      debugPrint("Stack: $stack");
     }
   }
 
-  //when create new widget would ask widget to pin
+  /// Request to pin a new widget to home screen
   Future<void> requestWidgetPinning(String name) async {
     try {
-      // This triggers the Android system dialog to pin the widget
       await HomeWidget.requestPinWidget(name: name);
     } catch (e) {
       debugPrint("Failed to request pin widget: $e");

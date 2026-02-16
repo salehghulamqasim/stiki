@@ -14,7 +14,6 @@ import 'package:stiki/utils/haptic_helper.dart';
 import 'package:stiki/utils/storage_helper.dart';
 
 import 'package:stiki/components/report_dialog.dart';
-import 'package:stiki/components/note_card.dart';
 
 class WidgetScreen extends StatefulWidget {
   final Color backgroundColor;
@@ -65,33 +64,17 @@ class _WidgetScreenState extends State<WidgetScreen> {
       topic: _controller.text.trim(),
       frequency: _currentFrequency,
       widgetName: widget.androidWidgetName,
+      backgroundColor: widget.cardColor.value,
+      textColor: widget.textColor.value,
     );
 
-    // Save to HomeWidget storage
-    await HomeWidget.saveWidgetData('note_screenshot_$widgetId', quote);
-    await HomeWidget.saveWidgetData('widget_id_$widgetId', widgetId);
-
-    // Render the widget image
-    await HomeWidget.renderFlutterWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: Material(
-          color: Colors.transparent,
-          child: NoteCard(
-            text: quote,
-            color: widget.cardColor,
-            textColor: widget.textColor,
-          ),
-        ),
-      ),
-      key: 'note_screenshot_$widgetId',
-      logicalSize: const Size(200, 200),
-    );
-
-    // Update the widget
-    await HomeWidget.updateWidget(
-      name: widget.androidWidgetName,
-      androidName: widget.androidWidgetName,
+    // Update widget using native text rendering (auto-sizes to any widget dimensions)
+    await WidgetService().updateStickyWidget(
+      text: quote,
+      color: widget.cardColor,
+      textColor: widget.textColor,
+      androidWidgetName: widget.androidWidgetName,
+      id: widgetId,
     );
 
     if (!mounted) return;

@@ -5,6 +5,39 @@ import 'package:stiki/utils/haptic_helper.dart';
 /// A collection of premium, cozy animations for the Stiki app.
 /// Following the design philosophy of organic flow and subtle sophistication.
 
+/// Global animation settings for performance optimization
+/// On lower-end devices (like Infinix), reduce animation complexity
+class AnimationSettings {
+  static bool _reducedMotion = false;
+  static int _maxStaggeredAnimations = 10;
+
+  /// Enable reduced motion for better performance on lower-end devices
+  static void setReducedMotion(bool value) {
+    _reducedMotion = value;
+  }
+
+  /// Set maximum number of staggered animations to run simultaneously
+  static void setMaxStaggeredAnimations(int value) {
+    _maxStaggeredAnimations = value;
+  }
+
+  static bool get reducedMotion => _reducedMotion;
+  static int get maxStaggeredAnimations => _maxStaggeredAnimations;
+
+  /// Auto-detect if device needs reduced animations (call on app start)
+  static void autoDetectPerformance() {
+    // This is a simple heuristic - in production, you might use
+    // device_info_plus to check for specific low-end devices
+    final dispatcher = WidgetsBinding.instance.platformDispatcher;
+    final view = dispatcher.views.first;
+    if (view.physicalSize.shortestSide < 720) {
+      // Likely a lower-end device with smaller screen
+      _reducedMotion = true;
+      _maxStaggeredAnimations = 5;
+    }
+  }
+}
+
 class PremiumEntrance extends StatefulWidget {
   final Widget child;
   final int index;
@@ -33,11 +66,28 @@ class _PremiumEntranceState extends State<PremiumEntrance>
   late Animation<double> _opacityAnimation;
   late Animation<double> _scaleAnimation;
   late Animation<Offset> _slideAnimation;
+  bool _skipAnimation = false;
 
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(vsync: this, duration: widget.duration);
+
+    // Performance optimization: skip animation for items beyond threshold
+    if (widget.index >= AnimationSettings.maxStaggeredAnimations) {
+      _skipAnimation = true;
+      _controller = AnimationController(vsync: this, duration: Duration.zero);
+      _opacityAnimation = AlwaysStoppedAnimation(1.0);
+      _scaleAnimation = AlwaysStoppedAnimation(1.0);
+      _slideAnimation = AlwaysStoppedAnimation(Offset.zero);
+      return;
+    }
+
+    // Reduce duration on lower-end devices
+    final effectiveDuration = AnimationSettings.reducedMotion
+        ? Duration(milliseconds: (widget.duration.inMilliseconds * 0.6).round())
+        : widget.duration;
+
+    _controller = AnimationController(vsync: this, duration: effectiveDuration);
 
     // Custom cubic bezier (0.16, 1, 0.3, 1) for smooth deceleration
     final curve = CurvedAnimation(
@@ -52,16 +102,25 @@ class _PremiumEntranceState extends State<PremiumEntrance>
       ),
     );
 
-    _scaleAnimation = Tween<double>(begin: 0.92, end: 1.0).animate(curve);
+    // Reduce scale animation on lower-end devices (less GPU work)
+    final scaleStart = AnimationSettings.reducedMotion ? 0.96 : 0.92;
+    _scaleAnimation = Tween<double>(begin: scaleStart, end: 1.0).animate(curve);
 
+    // Reduce slide distance on lower-end devices
+    final effectiveOffset = AnimationSettings.reducedMotion
+        ? Offset(widget.slideOffset.dx * 0.5, widget.slideOffset.dy * 0.5)
+        : widget.slideOffset;
     _slideAnimation = Tween<Offset>(
-      begin: widget.slideOffset,
+      begin: effectiveOffset,
       end: Offset.zero,
     ).animate(curve);
 
+    // Reduce stagger delay on lower-end devices
+    final staggerDelay = AnimationSettings.reducedMotion ? 50 : 100;
+
     // Start with a staggered delay
     Future.delayed(
-      widget.delay + Duration(milliseconds: widget.index * 100),
+      widget.delay + Duration(milliseconds: widget.index * staggerDelay),
       () {
         if (mounted) {
           if (widget.enableHaptic) {
@@ -81,6 +140,11 @@ class _PremiumEntranceState extends State<PremiumEntrance>
 
   @override
   Widget build(BuildContext context) {
+    // Skip animation completely for items beyond threshold
+    if (_skipAnimation) {
+      return RepaintBoundary(child: widget.child);
+    }
+
     return AnimatedBuilder(
       animation: _controller,
       builder: (context, child) {

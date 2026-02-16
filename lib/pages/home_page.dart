@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:stiki/components/widgets_options2.dart';
+import 'package:stiki/components/widget_gallery.dart';
 import 'package:stiki/models/widget_model.dart';
 import 'package:stiki/pages/widget_screen.dart';
 import 'package:stiki/components/quote_card.dart';
@@ -274,77 +274,79 @@ class _HomePageState extends State<HomePage> {
 
                     SizedBox(height: 48.h),
 
+                    // Widget Gallery Slider with "View All" button
                     PremiumEntrance(
                       index: 2,
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 8),
-                        child: Text(
-                          "Create New",
-                          style: GoogleFonts.poppins(
-                            fontSize: 18.sp,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.textPrimary,
-                          ),
-                        ),
-                      ),
-                    ),
+                      child: WidgetGallerySlider(
+                        onStyleSelected: (style) async {
+                          // Resolve dynamic colors if needed
+                          final Color resolvedCardColor = style.isDynamic
+                              ? (style.name == 'dynamic_light'
+                                    ? AppColors.dynamicLightWidget
+                                    : AppColors.dynamicDarkWidget)
+                              : style.backgroundColor;
 
-                    SizedBox(height: 20.h),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: PremiumEntrance(
-                            index: 3,
-                            child: WidgetOptionCard2(
-                              title: 'stiki dark',
-                              backgroundColor: AppColors.darkBackground,
-                              textColor: AppColors.textLight,
-                              circleColor: Colors.white.withValues(alpha: 0.1),
-                              iconColor: Colors.white.withValues(alpha: 0.3),
-                              onTap: () async {
-                                await Navigator.push(
-                                  context,
-                                  PageTransitionHelper.createRoute(
-                                    const WidgetScreen(
-                                      backgroundColor: AppColors.darkBackground,
-                                      cardColor: AppColors.darkBackground,
-                                      textColor: AppColors.textLight,
-                                      androidWidgetName: 'StikiWidgetDark',
-                                    ),
-                                  ),
-                                );
-                                _loadSavedWidgets();
-                              },
+                          final Color resolvedTextColor = style.isDynamic
+                              ? (style.name == 'dynamic_light'
+                                    ? AppColors.dynamicLightText
+                                    : AppColors.dynamicDarkText)
+                              : style.textColor;
+
+                          await Navigator.push(
+                            context,
+                            PageTransitionHelper.createRoute(
+                              WidgetScreen(
+                                backgroundColor: AppColors.background,
+                                cardColor: resolvedCardColor,
+                                textColor: resolvedTextColor,
+                                androidWidgetName: style.androidWidgetName,
+                              ),
                             ),
-                          ),
-                        ),
-                        SizedBox(width: 16.w),
-                        Expanded(
-                          child: PremiumEntrance(
-                            index: 4,
-                            child: WidgetOptionCard2(
-                              title: 'stiki light',
-                              backgroundColor: AppColors.yellowWidget,
-                              circleColor: Colors.black.withValues(alpha: 0.05),
-                              iconColor: Colors.black.withValues(alpha: 0.3),
-                              onTap: () async {
-                                await Navigator.push(
-                                  context,
-                                  PageTransitionHelper.createRoute(
-                                    const WidgetScreen(
-                                      backgroundColor: AppColors.background,
-                                      cardColor: AppColors.yellowWidget,
-                                      textColor: AppColors.textPrimary,
-                                      androidWidgetName: 'StikiWidgetLight',
+                          );
+                          _loadSavedWidgets();
+                        },
+                        onViewAllTap: () async {
+                          await Navigator.push(
+                            context,
+                            PageTransitionHelper.createRoute(
+                              WidgetGalleryPage(
+                                onStyleSelected: (style) async {
+                                  // Resolve dynamic colors if needed
+                                  final Color resolvedCardColor =
+                                      style.isDynamic
+                                      ? (style.name == 'dynamic_light'
+                                            ? AppColors.dynamicLightWidget
+                                            : AppColors.dynamicDarkWidget)
+                                      : style.backgroundColor;
+
+                                  final Color resolvedTextColor =
+                                      style.isDynamic
+                                      ? (style.name == 'dynamic_light'
+                                            ? AppColors.dynamicLightText
+                                            : AppColors.dynamicDarkText)
+                                      : style.textColor;
+
+                                  // Navigate to widget creation with selected style
+                                  await Navigator.pushReplacement(
+                                    context,
+                                    PageTransitionHelper.createRoute(
+                                      WidgetScreen(
+                                        backgroundColor: AppColors.background,
+                                        cardColor: resolvedCardColor,
+                                        textColor: resolvedTextColor,
+                                        androidWidgetName:
+                                            style.androidWidgetName,
+                                      ),
                                     ),
-                                  ),
-                                );
-                                _loadSavedWidgets();
-                              },
+                                  );
+                                  _loadSavedWidgets();
+                                },
+                              ),
                             ),
-                          ),
-                        ),
-                      ],
+                          );
+                          _loadSavedWidgets();
+                        },
+                      ),
                     ),
 
                     SizedBox(height: 48.h),
