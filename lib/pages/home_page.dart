@@ -51,8 +51,7 @@ class _HomePageState extends State<HomePage> {
       if (mounted) {
         setState(() {
           _displayQuote = savedData['quote'];
-          _quoteAuthor = "Stiki Wisdom";
-          _quoteAuthor = "Stiki Wisdom";
+          _quoteAuthor = savedData['author'] ?? "Stiki Wisdom";
         });
       }
       _refillCacheIfNeeded(); // Check if we need to top up for tomorrow
@@ -63,13 +62,15 @@ class _HomePageState extends State<HomePage> {
     final cachedQuote = await StorageHelper.popFutureQuote();
 
     if (cachedQuote != null) {
-      await StorageHelper.saveDailyQuote(cachedQuote, today);
       final authors = ["Stiki Wisdom", "Mr. Stiki", "Stiki Intelligence"];
+      final author = authors[Random().nextInt(authors.length)];
+
+      await StorageHelper.saveDailyQuote(cachedQuote, today, author: author);
 
       if (mounted) {
         setState(() {
           _displayQuote = cachedQuote;
-          _quoteAuthor = authors[Random().nextInt(authors.length)];
+          _quoteAuthor = author;
         });
       }
       _refillCacheIfNeeded(); // Top up cache
@@ -80,14 +81,13 @@ class _HomePageState extends State<HomePage> {
     try {
       final topics = [
         "Wise life advice",
-        "Funny corporate joke",
-        "Mindfulness reminder",
         "Motivational quote",
         "Philosophy in one sentence",
+        "Mindfulness reminder",
       ];
       final topic = topics[Random().nextInt(topics.length)];
 
-      // Fetch ONE for now to show user ASAP
+      // Fetch ONE for now to show user ASAP. Note: AiService logic handles API calls.
       final quotes = await AiService().fetchQuotes(
         "$topic (max 50 chars)",
         useDeepMode: true,
@@ -106,37 +106,68 @@ class _HomePageState extends State<HomePage> {
           .toList();
 
       String finalQuote;
+      String finalAuthor = "Stiki Wisdom";
 
       if (validQuotes.isNotEmpty) {
         finalQuote = validQuotes.first;
+        final authors = ["Stiki Wisdom", "Mr. Stiki", "Stiki Intelligence"];
+        finalAuthor = authors[Random().nextInt(authors.length)];
+
         // If we got extra quotes from this fetch, save them to cache!
         if (validQuotes.length > 1) {
           await StorageHelper.addFutureQuotes(validQuotes.sublist(1));
         }
       } else {
-        // FALLBACK: Use offline safe quotes if API failed or returned errors
+        // FALLBACK: Authentic Influencers & Books (10 Quotes)
         final fallbacks = [
-          "Believe you can and you're halfway there.",
-          "Act as if what you do makes a difference.",
-          "Success is not final, failure is not fatal.",
-          "You are never too old to set another goal.",
-          "Keep your face always toward the sunshine.",
-          "The only way to do great work is to love it.",
-          "Dream big and dare to fail.",
-          "Life is 10% what happens to us and 90% how we react.",
-          "Simplification is the ultimate sophistication.",
+          ("Stay hungry, stay foolish.", "Steve Jobs"),
+          ("Simplicity is the ultimate sophistication.", "Leonardo da Vinci"),
+          (
+            "All we have to decide is what to do with the time that is given us.",
+            "J.R.R. Tolkien",
+          ),
+          (
+            "It does not do to dwell on dreams and forget to live.",
+            "J.K. Rowling",
+          ),
+          ("We accept the love we think we deserve.", "Stephen Chbosky"),
+          (
+            "I am not afraid of storms, for I am learning how to sail my ship.",
+            "Louisa May Alcott",
+          ),
+          (
+            "Tomorrow is a new day with no mistakes in it yet.",
+            "L.M. Montgomery",
+          ),
+          (
+            "There is no greater agony than bearing an untold story inside you.",
+            "Maya Angelou",
+          ),
+          (
+            "When you want something, all the universe conspires in helping you to achieve it.",
+            "Paulo Coelho",
+          ),
+          (
+            "Great things are done by a series of small things brought together.",
+            "Vincent Van Gogh",
+          ),
         ];
-        finalQuote = fallbacks[Random().nextInt(fallbacks.length)];
+        final selection = fallbacks[Random().nextInt(fallbacks.length)];
+        finalQuote = selection.$1;
+        finalAuthor = selection.$2;
       }
 
       // Save valid result (or fallback) so we don't retry today
-      await StorageHelper.saveDailyQuote(finalQuote, today);
+      await StorageHelper.saveDailyQuote(
+        finalQuote,
+        today,
+        author: finalAuthor,
+      );
 
       if (mounted) {
-        final authors = ["Stiki Wisdom", "Mr. Stiki", "Stiki Intelligence"];
         setState(() {
           _displayQuote = finalQuote;
-          _quoteAuthor = authors[Random().nextInt(authors.length)];
+          _quoteAuthor = finalAuthor;
         });
       }
 
