@@ -47,8 +47,7 @@ class _WidgetEditScreenState extends State<WidgetEditScreen> {
           _selectedFrequency = fresh.frequency;
         });
       }
-    } catch (e) {
-    }
+    } catch (e) {}
   }
 
   /// Check if this widget is overdue for rotation and rotate if needed
@@ -114,7 +113,6 @@ class _WidgetEditScreenState extends State<WidgetEditScreen> {
           _selectedQuote = nextQuote;
         });
       }
-
     }
   }
 
@@ -134,10 +132,19 @@ class _WidgetEditScreenState extends State<WidgetEditScreen> {
     // 2. Push update to Home Screen Widget
     final isDark = widget.widget.widgetName.contains('Dark');
 
+    // Fix: Prioritize stored background color, fallback to defaults
+    final bgColor = widget.widget.backgroundColor != null
+        ? Color(widget.widget.backgroundColor!)
+        : (isDark ? AppColors.darkBackground : AppColors.yellowWidget);
+
+    final txtColor = widget.widget.textColor != null
+        ? Color(widget.widget.textColor!)
+        : (isDark ? AppColors.textLight : AppColors.textPrimary);
+
     await WidgetService().updateStickyWidget(
       text: _selectedQuote,
-      color: isDark ? AppColors.darkBackground : AppColors.yellowWidget,
-      textColor: isDark ? AppColors.textLight : AppColors.textPrimary,
+      color: bgColor,
+      textColor: txtColor,
       androidWidgetName: widget.widget.widgetName,
       id: widget.widget.id,
     );
