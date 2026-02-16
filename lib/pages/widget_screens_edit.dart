@@ -22,13 +22,34 @@ class WidgetEditScreen extends StatefulWidget {
 class _WidgetEditScreenState extends State<WidgetEditScreen> {
   late String _selectedQuote;
   late String _selectedFrequency;
+  late List<String> _quotes;
 
   @override
   void initState() {
     super.initState();
     _selectedQuote = widget.widget.quote;
     _selectedFrequency = widget.widget.frequency;
+    _quotes = widget.widget.quotes;
+    _refreshFromStorage();
     _rotateIfOverdue();
+  }
+
+  /// Reload widget data from storage to ensure we have all quotes
+  /// This fixes the issue when opening from home screen tap
+  Future<void> _refreshFromStorage() async {
+    try {
+      final widgets = await StorageHelper.getQuotes();
+      final fresh = widgets.where((w) => w.id == widget.widget.id).firstOrNull;
+      if (fresh != null && fresh.quotes.isNotEmpty && mounted) {
+        setState(() {
+          _quotes = fresh.quotes;
+          _selectedQuote = fresh.quote;
+          _selectedFrequency = fresh.frequency;
+        });
+      }
+    } catch (e) {
+      debugPrint('⚠️ Could not refresh widget data: $e');
+    }
   }
 
   /// Check if this widget is overdue for rotation and rotate if needed
@@ -107,7 +128,7 @@ class _WidgetEditScreenState extends State<WidgetEditScreen> {
       _selectedQuote,
       id: widget.widget.id,
       frequency: _selectedFrequency,
-      quotes: widget.widget.quotes,
+      quotes: _quotes,
       topic: widget.widget.topic,
       widgetName: widget.widget.widgetName,
     );
@@ -260,10 +281,10 @@ class _WidgetEditScreenState extends State<WidgetEditScreen> {
                 ListView.separated(
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
-                  itemCount: widget.widget.quotes.length,
+                  itemCount: _quotes.length,
                   separatorBuilder: (context, index) => SizedBox(height: 12.h),
                   itemBuilder: (context, index) {
-                    final q = widget.widget.quotes[index];
+                    final q = _quotes[index];
                     final isSelected = _selectedQuote == q;
                     return PremiumEntrance(
                       index: 3 + index,

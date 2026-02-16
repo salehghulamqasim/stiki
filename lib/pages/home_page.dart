@@ -295,44 +295,78 @@ class _HomePageState extends State<HomePage> {
 
     await showDialog(
       context: context,
-      builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: Text(
-          'Keep Quotes Fresh 🔄',
-          style: GoogleFonts.poppins(fontWeight: FontWeight.bold),
-        ),
-        content: Text(
-          'To ensure your widget quotes rotate on time, please disable battery optimization for Stiki.\n\nThis lets the app refresh quotes in the background.',
-          style: GoogleFonts.poppins(fontSize: 14, height: 1.5),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: Text('Later', style: GoogleFonts.poppins()),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              Navigator.pop(ctx);
-              // Open Android battery optimization settings for this app
-              const platform = MethodChannel('com.stiki.app/battery');
-              try {
-                await platform.invokeMethod('requestBatteryOptimization');
-              } catch (e) {
-                debugPrint('⚠️ Battery optimization request failed: $e');
-              }
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.darkBackground,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
+      builder: (ctx) => Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        backgroundColor: AppColors.background,
+        child: Padding(
+          padding: EdgeInsets.all(24.r),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text('✨', style: TextStyle(fontSize: 32.sp)),
+              SizedBox(height: 12.h),
+              Text(
+                'Stay Fresh',
+                style: GoogleFonts.poppins(
+                  fontSize: 18.sp,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.textPrimary,
+                ),
               ),
-            ),
-            child: Text(
-              'Open Settings',
-              style: GoogleFonts.poppins(color: Colors.white),
-            ),
+              SizedBox(height: 8.h),
+              Text(
+                'Allow background activity so your quotes refresh on time.',
+                textAlign: TextAlign.center,
+                style: GoogleFonts.poppins(
+                  fontSize: 13.sp,
+                  color: AppColors.textSecondary,
+                  height: 1.5,
+                ),
+              ),
+              SizedBox(height: 20.h),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () async {
+                    Navigator.pop(ctx);
+                    const platform = MethodChannel('com.stiki.app/battery');
+                    try {
+                      await platform.invokeMethod('requestBatteryOptimization');
+                    } catch (e) {
+                      debugPrint('⚠️ Battery opt failed: $e');
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.darkBackground,
+                    padding: EdgeInsets.symmetric(vertical: 14.h),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    elevation: 0,
+                  ),
+                  child: Text(
+                    'Allow',
+                    style: GoogleFonts.poppins(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ),
+              SizedBox(height: 8.h),
+              TextButton(
+                onPressed: () => Navigator.pop(ctx),
+                child: Text(
+                  'Not now',
+                  style: GoogleFonts.poppins(
+                    fontSize: 12.sp,
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
 
